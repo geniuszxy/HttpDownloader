@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -13,7 +14,8 @@ namespace HttpDownloader
 	public partial class MainForm : Form
 	{
 		const string CONFIG_FILE = "config.xml";
-		DefaultConfig _dc;
+		ConfigFile _cf;
+		LogWindow _logw;
 
 		public MainForm()
 		{
@@ -21,24 +23,28 @@ namespace HttpDownloader
 
 			if (File.Exists(CONFIG_FILE))
 			{
-				var serializer = new XmlSerializer(typeof(DefaultConfig));
-				_dc = (DefaultConfig)serializer.Deserialize(new FileStream(CONFIG_FILE, FileMode.Open));
+				var serializer = new XmlSerializer(typeof(ConfigFile));
+				using (var fs = new FileStream(CONFIG_FILE, FileMode.Open))
+					_cf = (ConfigFile)serializer.Deserialize(fs);
 
-				this.Location = new Point(_dc.X, _dc.Y);
-				this.Size = new Size(_dc.W, _dc.H);
+				Location = new Point(_cf.X, _cf.Y);
+				Size = new Size(_cf.W, _cf.H);
 			}
 			else
-				_dc = new DefaultConfig();
+				_cf = new ConfigFile();
+
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 		}
 
+		/// <summary>
+		/// Callback from TaskConfigWindow
+		/// </summary>
 		internal void AddNewTask(DownloadConfig config)
 		{
 			if (InvokeRequired)
 				Invoke(new Action<DownloadConfig>(AddNewTask), config);
 			else
 			{
-				_dc.Referer = config.Referer;
-				_dc.Save = config.Save;
 				var d = new Downloader
 				{
 					Width = flowLayoutPanel1.ClientSize.Width,
@@ -52,7 +58,7 @@ namespace HttpDownloader
 
 		private void newToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			var dialog = new TaskConfigWindow(_dc);
+			var dialog = new TaskConfigWindow(_cf);
 			dialog.Show(this);
 		}
 
@@ -68,16 +74,29 @@ namespace HttpDownloader
 
 		private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			if(_dc == null)
-				_dc = new DefaultConfig();
+			if (_cf == null)
+				_cf = new ConfigFile();
 
-			_dc.X = this.Location.X;
-			_dc.Y = this.Location.Y;
-			_dc.W = this.Width;
-			_dc.H = this.Height;
+			_cf.X = Location.X;
+			_cf.Y = Location.Y;
+			_cf.W = Width;
+			_cf.H = Height;
 
-			var serializer = new XmlSerializer(typeof(DefaultConfig));
-			serializer.Serialize(new FileStream(CONFIG_FILE, FileMode.Create), _dc);
+			var serializer = new XmlSerializer(typeof(ConfigFile));
+			using (var fs = new FileStream(CONFIG_FILE, FileMode.Create))
+				serializer.Serialize(fs, _cf);
+		}
+
+		internal void ReportError(Exception ex)
+		{
+			if(_logw == null)
+			{
+				_logw = new LogWindow();
+			}
+
+			_logw.Show();
+			_logw.Append(ex.Message);
+			_logw.Append(ex.StackTrace);
 		}
 	}
 }

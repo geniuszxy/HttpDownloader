@@ -37,7 +37,7 @@
 			// lblName
 			// 
 			this.lblName.AutoSize = true;
-			this.lblName.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.lblName.Font = new System.Drawing.Font("Microsoft YaHei", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.lblName.Location = new System.Drawing.Point(3, 3);
 			this.lblName.Name = "lblName";
 			this.lblName.Size = new System.Drawing.Size(43, 17);
@@ -51,7 +51,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.progress.Location = new System.Drawing.Point(6, 23);
 			this.progress.Name = "progress";
-			this.progress.Size = new System.Drawing.Size(215, 12);
+			this.progress.Size = new System.Drawing.Size(215, 32);
 			this.progress.TabIndex = 1;
 			// 
 			// btnCancel
@@ -60,10 +60,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnCancel.FlatAppearance.BorderSize = 0;
 			this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btnCancel.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.btnCancel.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.btnCancel.Location = new System.Drawing.Point(265, 3);
 			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Size = new System.Drawing.Size(32, 32);
+			this.btnCancel.Size = new System.Drawing.Size(32, 52);
 			this.btnCancel.TabIndex = 3;
 			this.btnCancel.Text = "✖";
 			this.btnCancel.UseVisualStyleBackColor = true;
@@ -75,10 +75,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnOther.FlatAppearance.BorderSize = 0;
 			this.btnOther.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btnOther.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.btnOther.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.btnOther.Location = new System.Drawing.Point(227, 3);
 			this.btnOther.Name = "btnOther";
-			this.btnOther.Size = new System.Drawing.Size(32, 32);
+			this.btnOther.Size = new System.Drawing.Size(32, 52);
 			this.btnOther.TabIndex = 2;
 			this.btnOther.Text = "▶";
 			this.btnOther.UseVisualStyleBackColor = true;
@@ -94,7 +94,7 @@
 			this.Controls.Add(this.lblName);
 			this.Margin = new System.Windows.Forms.Padding(0);
 			this.Name = "Downloader";
-			this.Size = new System.Drawing.Size(300, 38);
+			this.Size = new System.Drawing.Size(300, 58);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

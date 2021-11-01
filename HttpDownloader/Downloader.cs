@@ -14,6 +14,7 @@ namespace HttpDownloader
 	public partial class Downloader : UserControl
 	{
 		HttpWebRequest request;
+		long writeBytes;
 
 		public Downloader()
 		{
@@ -41,22 +42,25 @@ namespace HttpDownloader
 
 			try
 			{
-				using (var output = new FileStream(config.Save, FileMode.Create))
+				FileMode fm = config.Resume ? FileMode.OpenOrCreate : FileMode.Create;
+				using (var output = new FileStream(config.Save, fm, FileAccess.ReadWrite))
 				{
-					var req = request = (HttpWebRequest)WebRequest.Create(config.URL);
-					req.Method = "GET";
-					if (config.Referer != null)
-						req.Referer = config.Referer;
-					//req.Accept = "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5";
+					var req = request = config.CreateRequest();
+					if(config.Resume)
+					{
+						writeBytes = (int)output.Seek(0, SeekOrigin.End);
+						if (writeBytes > 0)
+							req.AddRange(writeBytes);
+					}
 
 					using (var resp = (HttpWebResponse)req.GetResponse())
 					{
 						if (resp.StatusCode < HttpStatusCode.OK || resp.StatusCode >= HttpStatusCode.Ambiguous)
 							throw new Exception("Http status: " + resp.StatusCode);
 
-						int contentLength = (int)resp.ContentLength;
+						long contentLength = resp.ContentLength;
 						_ReportProgressStyle(contentLength > 0 ? ProgressBarStyle.Continuous : ProgressBarStyle.Marquee, contentLength);
-						int writeBytes = 0;
+						writeBytes = 0;
 
 						using (Stream respStream = resp.GetResponseStream())
 						{
@@ -85,7 +89,7 @@ namespace HttpDownloader
 			}
 			catch(Exception ex)
 			{
-				throw ex;
+				_ReportError(ex);
 			}
 			finally
 			{
@@ -93,25 +97,29 @@ namespace HttpDownloader
 			}
 		}
 
-		private void _ReportProgressStyle(ProgressBarStyle style, int maxValue)
+		private void _ReportProgressStyle(ProgressBarStyle style, long maxValue)
 		{
 			if (this.InvokeRequired)
-				this.Invoke(new Action<ProgressBarStyle, int>(_ReportProgressStyle), style, maxValue);
+				this.Invoke(new Action<ProgressBarStyle, long>(_ReportProgressStyle), style, maxValue);
 			else
 			{
 				progress.Style = style;
 				if (style != ProgressBarStyle.Marquee)
-					progress.Maximum = maxValue;
+					progress.Maximum = (int)maxValue;
 				progress.Value = 0;
 			}
 		}
 
-		private void _ReportProgress(int p)
+		private void _ReportProgress(long p)
 		{
 			if (this.InvokeRequired)
-				this.Invoke(new Action<int>(_ReportProgress), p);
+				this.Invoke(new Action<long>(_ReportProgress), p);
 			else
-				progress.Value = p;
+			{
+				if (p <= progress.Maximum)
+					progress.Value = (int)p;
+				Invalidate();
+			}
 		}
 
 		private void _ReportComplete()
@@ -125,26 +133,31 @@ namespace HttpDownloader
 			}
 		}
 
+		private void _ReportError(Exception ex)
+		{
+			if (this.InvokeRequired)
+				this.Invoke(new Action<Exception>(_ReportError), ex);
+			else
+			{
+				lblName.Text = "(Error)" + lblName.Text;
+				((MainForm)this.ParentForm).ReportError(ex);
+			}
+		}
+
 		private void btnCancel_Click(object sender, EventArgs e)
 		{
 			Cancel();
 			((MainForm)this.ParentForm).OnTaskCancelled(this);
 		}
-	}
 
-	public class DownloadConfig
-	{
-		public string URL;
-		public string Referer;
-		public string Save;
-	}
-
-	[Serializable]
-	public class DefaultConfig
-	{
-		public string Referer;
-		public string Save;
-
-		public int X, Y, W, H;
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			base.OnPaint(e);
+			var g = e.Graphics;
+			var str = writeBytes.ToString();
+			var f = Font;
+			var size = g.MeasureString(str, f);
+			g.DrawString(str, f, SystemBrushes.WindowText, btnOther.Left - size.Width - 3f, 3f);
+		}
 	}
 }
