@@ -82,9 +82,9 @@ namespace HttpDownloader
 
 						using (Stream respStream = resp.GetResponseStream())
 						{
-							byte[] buffer = new byte[4096];
-							var stopWatcher = Stopwatch.StartNew();
-							var readBytes = 0;
+							byte[] buffer = new byte[32768]; //32K
+							//var stopWatcher = Stopwatch.StartNew();
+							//var readBytes = 0;
 							do
 							{
 								int read = respStream.Read(buffer, 0, buffer.Length);
@@ -93,14 +93,15 @@ namespace HttpDownloader
 								{
 									output.Write(buffer, 0, read);
 									writeBytes += read;
-									readBytes += read;
-									long elapsed = stopWatcher.ElapsedMilliseconds;
-									if (elapsed >= 1000)
-									{
-										_ReportProgress(readBytes, elapsed);
-										stopWatcher.Restart();
-										readBytes = 0;
-									}
+									//readBytes += read;
+									//long elapsed = stopWatcher.ElapsedMilliseconds;
+									//if (elapsed >= 1000)
+									//{
+									//	_ReportProgress(readBytes, elapsed);
+									//	stopWatcher.Restart();
+									//	readBytes = 0;
+									//}
+									_ReportProgress(0, 0);
 								}
 								else
 								{
@@ -142,21 +143,19 @@ namespace HttpDownloader
 				Invoke(new Action<long, long>(_ReportProgress), read, dur);
 			else
 			{
-				Console.WriteLine("dur=" + dur + ", read=" + read);
-
-				string text;
-				var bytes = (double)read / dur * 1000.0;
-				if (bytes > 1048576)
-					text = (bytes / 1048576).ToString("0.# MB/s");
-				else if (bytes > 1024)
-					text = (bytes / 1024).ToString("0.# KB/s");
-				else
-					text = bytes.ToString("0.# B/s");
+				string text = "";
+				//var bytes = (double)read / dur * 1000.0;
+				//if (bytes > 1048576)
+				//	text = (bytes / 1048576).ToString("0.# MB/s");
+				//else if (bytes > 1024)
+				//	text = (bytes / 1024).ToString("0.# KB/s");
+				//else
+				//	text = bytes.ToString("0.# B/s");
 
 				if (writeBytes <= progress.Maximum)
 				{
 					progress.Value = (int)writeBytes;
-					text = text + " " + ((double)writeBytes / progress.Maximum).ToString("0.#%");
+					text = /*text + " " +*/ ((double)writeBytes / progress.Maximum).ToString("0.#%");
 				}
 
 				progress.Text = text;
@@ -185,9 +184,12 @@ namespace HttpDownloader
 
 		private void _ReportError(Exception ex)
 		{
+			if (config == null)
+				return;
+
 			if (InvokeRequired)
 				Invoke(new Action<Exception>(_ReportError), ex);
-			else
+			else if (config != null)
 			{
 				progress.Text = "Error";
 				((MainForm)ParentForm).ReportError(ex);
@@ -211,6 +213,7 @@ namespace HttpDownloader
 		private void btnCancel_Click(object sender, EventArgs e)
 		{
 			Cancel();
+			config = null;
 			((MainForm)ParentForm).OnTaskCancelled(this);
 		}
 

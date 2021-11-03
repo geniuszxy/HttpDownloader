@@ -1,2 +1,2 @@
-# HttpDownloader
-Simple http downloader
+A simple http downloader.
+You can control multiple http headers before sending a request.

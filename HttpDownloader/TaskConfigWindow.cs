@@ -98,7 +98,23 @@ namespace HttpDownloader
 
 		private void btnDNS_Click(object sender, EventArgs e)
 		{
-			var hosts = Dns.GetHostEntry("");
+			var dc = (DownloadConfig)cbbConfigs.SelectedItem;
+			var host = dc.Host;
+			if(host == null)
+			{
+				MessageBox.Show("Set host first");
+			}
+			else
+			{
+				var hosts = Dns.GetHostEntry(host);
+				var w = new DNSWindow(hosts);
+				var result = w.ShowDialog(this);
+				if (result == DialogResult.OK)
+				{
+					dc.SetIPAddress(w.SelectedAddress);
+					pgHeader.Refresh();
+				}
+			}
 		}
 
 		//private void tbURL_TextChanged(object sender, EventArgs e)

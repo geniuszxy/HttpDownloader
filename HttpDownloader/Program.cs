@@ -19,19 +19,13 @@ namespace HttpDownloader
 		[STAThread]
 		static void Main(string[] args)
 		{
-			try
-			{
-				if (!InitArgs(args))
-					return;
+			if (!InitArgs(args))
+				return;
 
-				Application.EnableVisualStyles();
-				Application.SetCompatibleTextRenderingDefault(false);
-				Application.Run(_mainForm = new MainForm(args));
-			}
-			catch(Exception ex)
-			{
-				MessageBox.Show(ex.ToString());
-			}
+			AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+			Application.EnableVisualStyles();
+			Application.SetCompatibleTextRenderingDefault(false);
+			Application.Run(_mainForm = new MainForm(args));
 		}
 
 		static bool InitArgs(string[] args)
@@ -113,6 +107,11 @@ namespace HttpDownloader
 				pipeServer.Disconnect();
 			}
 			while (true);
+		}
+
+		private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
+		{
+			MessageBox.Show(e.ExceptionObject.ToString());
 		}
 	}
 }

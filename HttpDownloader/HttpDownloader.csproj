@@ -52,6 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigFile.cs" />
+    <Compile Include="DNSWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DNSWindow.Designer.cs">
+      <DependentUpon>DNSWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="LogWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -81,6 +87,9 @@
     <Compile Include="TaskConfigWindow.Designer.cs">
       <DependentUpon>TaskConfigWindow.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="DNSWindow.resx">
+      <DependentUpon>DNSWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Downloader.resx">
       <DependentUpon>Downloader.cs</DependentUpon>
     </EmbeddedResource>
