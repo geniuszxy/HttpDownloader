@@ -8,11 +8,13 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using System.Net;
+using System.Diagnostics;
 
 namespace HttpDownloader
 {
 	public partial class Downloader : UserControl
 	{
+		DownloadConfig config;
 		HttpWebRequest request;
 		long writeBytes;
 
@@ -23,30 +25,41 @@ namespace HttpDownloader
 
 		internal void Start(DownloadConfig config)
 		{
+			this.config = config;
 			lblName.Text = config.URL;
-			ThreadPool.QueueUserWorkItem(_Request, config);
+			btnOther.Text = "‖";
+			ThreadPool.QueueUserWorkItem(_Request);
 		}
 
 		internal void Cancel()
 		{
 			if(request != null)
 			{
-				request.Abort();
-				request = null;
+				try
+				{
+					request.Abort();
+				}
+				catch (Exception ex)
+				{
+					_ReportError(ex);
+				}
+				finally
+				{
+					request = null;
+				}
 			}
 		}
 
 		private void _Request(object state)
 		{
-			var config = (DownloadConfig)state;
-
 			try
 			{
 				FileMode fm = config.Resume ? FileMode.OpenOrCreate : FileMode.Create;
 				using (var output = new FileStream(config.Save, fm, FileAccess.ReadWrite))
 				{
 					var req = request = config.CreateRequest();
-					if(config.Resume)
+					writeBytes = 0;
+					if (config.Resume)
 					{
 						writeBytes = (int)output.Seek(0, SeekOrigin.End);
 						if (writeBytes > 0)
@@ -59,26 +72,39 @@ namespace HttpDownloader
 							throw new Exception("Http status: " + resp.StatusCode);
 
 						long contentLength = resp.ContentLength;
-						_ReportProgressStyle(contentLength > 0 ? ProgressBarStyle.Continuous : ProgressBarStyle.Marquee, contentLength);
-						writeBytes = 0;
+						ProgressBarStyle barStyle = ProgressBarStyle.Marquee;
+						if (contentLength > 0)
+						{
+							barStyle = ProgressBarStyle.Continuous;
+							contentLength += writeBytes;
+						}
+						_ReportProgressStyle(barStyle, contentLength);
 
 						using (Stream respStream = resp.GetResponseStream())
 						{
 							byte[] buffer = new byte[4096];
-							int read;
+							var stopWatcher = Stopwatch.StartNew();
+							var readBytes = 0;
 							do
 							{
-								read = respStream.Read(buffer, 0, buffer.Length);
+								int read = respStream.Read(buffer, 0, buffer.Length);
 
 								if (read > 0)
 								{
 									output.Write(buffer, 0, read);
 									writeBytes += read;
-									_ReportProgress(writeBytes);
+									readBytes += read;
+									long elapsed = stopWatcher.ElapsedMilliseconds;
+									if (elapsed >= 1000)
+									{
+										_ReportProgress(readBytes, elapsed);
+										stopWatcher.Restart();
+										readBytes = 0;
+									}
 								}
 								else
 								{
-									_ReportComplete();
+									_ReportComplete(contentLength);
 									return;
 								}
 							}
@@ -99,8 +125,8 @@ namespace HttpDownloader
 
 		private void _ReportProgressStyle(ProgressBarStyle style, long maxValue)
 		{
-			if (this.InvokeRequired)
-				this.Invoke(new Action<ProgressBarStyle, long>(_ReportProgressStyle), style, maxValue);
+			if (InvokeRequired)
+				Invoke(new Action<ProgressBarStyle, long>(_ReportProgressStyle), style, maxValue);
 			else
 			{
 				progress.Style = style;
@@ -110,54 +136,88 @@ namespace HttpDownloader
 			}
 		}
 
-		private void _ReportProgress(long p)
+		private void _ReportProgress(long read, long dur)
 		{
-			if (this.InvokeRequired)
-				this.Invoke(new Action<long>(_ReportProgress), p);
+			if (InvokeRequired)
+				Invoke(new Action<long, long>(_ReportProgress), read, dur);
 			else
 			{
-				if (p <= progress.Maximum)
-					progress.Value = (int)p;
-				Invalidate();
+				Console.WriteLine("dur=" + dur + ", read=" + read);
+
+				string text;
+				var bytes = (double)read / dur * 1000.0;
+				if (bytes > 1048576)
+					text = (bytes / 1048576).ToString("0.# MB/s");
+				else if (bytes > 1024)
+					text = (bytes / 1024).ToString("0.# KB/s");
+				else
+					text = bytes.ToString("0.# B/s");
+
+				if (writeBytes <= progress.Maximum)
+				{
+					progress.Value = (int)writeBytes;
+					text = text + " " + ((double)writeBytes / progress.Maximum).ToString("0.#%");
+				}
+
+				progress.Text = text;
+				progress.Invalidate();
 			}
 		}
 
-		private void _ReportComplete()
+		private void _ReportComplete(long maxValue)
 		{
-			if (this.InvokeRequired)
-				this.Invoke(new Action(_ReportComplete));
-			else
+			if (InvokeRequired)
+				Invoke(new Action<long>(_ReportComplete), maxValue);
+
+			else if (maxValue <= 0 || writeBytes >= maxValue)
 			{
 				progress.Value = progress.Maximum;
-				lblName.Text = "(Complete)" + lblName.Text;
+				progress.Text = "Complete";
+				config = null;
+				btnOther.Text = "";
+			}
+			else
+			{
+				progress.Text = "Interrupted";
+				SetRetry();
 			}
 		}
 
 		private void _ReportError(Exception ex)
 		{
-			if (this.InvokeRequired)
-				this.Invoke(new Action<Exception>(_ReportError), ex);
+			if (InvokeRequired)
+				Invoke(new Action<Exception>(_ReportError), ex);
 			else
 			{
-				lblName.Text = "(Error)" + lblName.Text;
-				((MainForm)this.ParentForm).ReportError(ex);
+				progress.Text = "Error";
+				((MainForm)ParentForm).ReportError(ex);
+				SetRetry();
+			}
+		}
+
+		private void btnOther_Click(object sender, EventArgs e)
+		{
+			if(request != null)
+			{
+				Cancel();
+				SetRetry();
+			}
+			else if(config != null)
+			{
+				Start(config);
 			}
 		}
 
 		private void btnCancel_Click(object sender, EventArgs e)
 		{
 			Cancel();
-			((MainForm)this.ParentForm).OnTaskCancelled(this);
+			((MainForm)ParentForm).OnTaskCancelled(this);
 		}
 
-		protected override void OnPaint(PaintEventArgs e)
+		private void SetRetry()
 		{
-			base.OnPaint(e);
-			var g = e.Graphics;
-			var str = writeBytes.ToString();
-			var f = Font;
-			var size = g.MeasureString(str, f);
-			g.DrawString(str, f, SystemBrushes.WindowText, btnOther.Left - size.Width - 3f, 3f);
+			config.Resume = true;
+			btnOther.Text = "↻";
 		}
 	}
 }

@@ -28,9 +28,9 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -51,24 +51,13 @@
 			this.newToolStripMenuItem.Text = "New(&N)";
 			this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
 			// 
-			// flowLayoutPanel1
-			// 
-			this.flowLayoutPanel1.AutoScroll = true;
-			this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-			this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 25);
-			this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-			this.flowLayoutPanel1.Size = new System.Drawing.Size(577, 237);
-			this.flowLayoutPanel1.TabIndex = 1;
-			this.flowLayoutPanel1.WrapContents = false;
-			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(577, 262);
-			this.Controls.Add(this.flowLayoutPanel1);
 			this.Controls.Add(this.menuStrip1);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "MainForm";
 			this.Text = "Http Downloader";
@@ -84,7 +73,6 @@
 
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
-		private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
 	}
 }
 

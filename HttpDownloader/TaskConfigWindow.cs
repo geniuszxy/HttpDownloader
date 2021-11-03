@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -29,71 +30,42 @@ namespace HttpDownloader
 
 		private void btnBrowse_Click(object sender, EventArgs e)
 		{
-			var dialog = new SaveFileDialog();
-			if (!string.IsNullOrWhiteSpace(tbOutput.Text))
-			{
-				dialog.InitialDirectory = Path.GetDirectoryName(tbOutput.Text);
-				dialog.FileName = Path.GetFileName(tbOutput.Text);
-			}
-			if (dialog.ShowDialog(this) == DialogResult.OK)
-				tbOutput.Text = dialog.FileName;
+			//var dialog = new SaveFileDialog();
+			//if (!string.IsNullOrWhiteSpace(tbOutput.Text))
+			//{
+			//	dialog.InitialDirectory = Path.GetDirectoryName(tbOutput.Text);
+			//	dialog.FileName = Path.GetFileName(tbOutput.Text);
+			//}
+			//if (dialog.ShowDialog(this) == DialogResult.OK)
+			//	tbOutput.Text = dialog.FileName;
 		}
 
 		private void btnStart_Click(object sender, EventArgs e)
 		{
-			string URL = tbURL.Text;
-			string output = tbOutput.Text;
-
-			if (string.IsNullOrWhiteSpace(URL))
+			var dc = (DownloadConfig)cbbConfigs.SelectedItem;
+			
+			if (string.IsNullOrWhiteSpace(dc.URL))
 			{
 				MessageBox.Show("必须输入网址");
 				return;
 			}
 
-			if (string.IsNullOrWhiteSpace(output))
+			if (string.IsNullOrWhiteSpace(dc.Save))
 			{
 				MessageBox.Show("必须指定输出目录");
 				return;
 			}
 
+			((MainForm)this.Owner).AddNewTask(dc.Clone());
 
-			var dc = (DownloadConfig)cbbConfigs.SelectedItem;
-			dc.URL = URL;
-			dc.Save = output;
-			dc.Referer = WrapTextBox(tbRefer);
-			dc.Method = WrapTextBox(tbMethod);
-			dc.Resume = cbResume.Checked;
-			dc.Accept = WrapTextBox(tbAccept);
-			dc.Pragma = WrapTextBox(tbPragma);
-			dc.Connection = WrapTextBox(tbConnection);
-			dc.UserAgent = WrapTextBox(tbUserAgent);
-			dc.Cache_Control = WrapTextBox(tbCacheControl);
-			dc.Sec_Fetch_Dest = WrapTextBox(tbSecFetchDest);
-			dc.Sec_Fetch_Mode = WrapTextBox(tbSecFetchMode);
-			dc.Sec_Fetch_Site = WrapTextBox(tbSecFetchSite);
-
-			((MainForm)this.Owner).AddNewTask(dc);
-
-			this.Close();
+			Close();
 		}
 
 		private void cbbConfigs_SelectedIndexChanged(object sender, EventArgs e)
 		{
+			_cf.LastConfigIndex = cbbConfigs.SelectedIndex;
 			var dc = (DownloadConfig)cbbConfigs.SelectedItem;
-
-			tbURL.Text = dc.URL ?? "";
-			tbOutput.Text = dc.Save ?? "";
-			tbRefer.Text = dc.Referer ?? "";
-			tbMethod.Text = dc.Method ?? "";
-			cbResume.Checked = dc.Resume;
-			tbAccept.Text = dc.Accept ?? "";
-			tbPragma.Text = dc.Pragma ?? "";
-			tbConnection.Text = dc.Connection ?? "";
-			tbUserAgent.Text = dc.UserAgent ?? "";
-			tbCacheControl.Text = dc.Cache_Control ?? "";
-			tbSecFetchDest.Text = dc.Sec_Fetch_Dest ?? "";
-			tbSecFetchMode.Text = dc.Sec_Fetch_Mode ?? "";
-			tbSecFetchSite.Text = dc.Sec_Fetch_Site ?? "";
+			pgHeader.SelectedObject = dc;
 		}
 
 		private void btnAddConfig_Click(object sender, EventArgs e)
@@ -124,10 +96,15 @@ namespace HttpDownloader
 			}
 		}
 
-		private static string WrapTextBox(TextBox tb)
+		private void btnDNS_Click(object sender, EventArgs e)
 		{
-			var text = tb.Text;
-			return string.IsNullOrWhiteSpace(text) ? null : text;
+			var hosts = Dns.GetHostEntry("");
 		}
+
+		//private void tbURL_TextChanged(object sender, EventArgs e)
+		//{
+		//	if (string.IsNullOrWhiteSpace(tbRefer.Text))
+		//		tbRefer.Text = tbURL.Text;
+		//}
 	}
 }

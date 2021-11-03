@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms.Design;
 
 namespace HttpDownloader
 {
@@ -19,23 +18,29 @@ namespace HttpDownloader
 	}
 
 	[Serializable]
+	[DefaultProperty("URL")]
 	public class DownloadConfig
 	{
-		public string Save;
-		public bool Resume = true;
+		[Category("Main")]
+		[Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		public string Save { get; set; }
+		public bool Resume { get; set; } = true;
 
-		public string URL;
-		public string Method = "GET";
-		public string Referer;
-		public string UserAgent;
-		public string Accept = "video/webm,video/ogg,video/*,application/ogg,audio/*,*/*";
-		public string Connection = "keep-alive";
+		[Category("Main")]
+		public string URL { get; set; }
+		[Category("Main")]
+		public string Method { get; set; } = "GET";
+		[Category("Main")]
+		public string Referer { get; set; }
+		public string UserAgent { get; set; }
+		public string Accept { get; set; } = "video/webm,video/ogg,video/*,application/ogg,audio/*,*/*";
+		public string Connection { get; set; } = "keep-alive";
 
-		public string Sec_Fetch_Dest = "video";
-		public string Sec_Fetch_Mode = "no-cors";
-		public string Sec_Fetch_Site = "same-origin";
-		public string Pragma = "no-cache";
-		public string Cache_Control = "no-cache";
+		public string Sec_Fetch_Dest { get; set; } = "video";
+		public string Sec_Fetch_Mode { get; set; } = "no-cors";
+		public string Sec_Fetch_Site { get; set; } = "same-origin";
+		public string Pragma { get; set; } = "no-cache";
+		public string Cache_Control { get; set; } = "no-cache";
 
 		public HttpWebRequest CreateRequest()
 		{

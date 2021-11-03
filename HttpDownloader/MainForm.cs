@@ -17,7 +17,7 @@ namespace HttpDownloader
 		ConfigFile _cf;
 		LogWindow _logw;
 
-		public MainForm()
+		public MainForm(string[] args)
 		{
 			InitializeComponent();
 
@@ -34,6 +34,9 @@ namespace HttpDownloader
 				_cf = new ConfigFile();
 
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+			if(args.Length > 0)
+				Load += new InitTasks(args).OnLoad;
 		}
 
 		/// <summary>
@@ -47,11 +50,11 @@ namespace HttpDownloader
 			{
 				var d = new Downloader
 				{
-					Width = flowLayoutPanel1.ClientSize.Width,
-					Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
+					Height = 50,
+					Dock = DockStyle.Top,
 				};
-				flowLayoutPanel1.Controls.Add(d);
-
+				Controls.Add(d);
+				d.BringToFront();
 				d.Start(config);
 			}
 		}
@@ -68,7 +71,7 @@ namespace HttpDownloader
 				Invoke(new Action<Downloader>(OnTaskCancelled), downloader);
 			else
 			{
-				flowLayoutPanel1.Controls.Remove(downloader);
+				Controls.Remove(downloader);
 			}
 		}
 
@@ -97,6 +100,38 @@ namespace HttpDownloader
 			_logw.Show();
 			_logw.Append(ex.Message);
 			_logw.Append(ex.StackTrace);
+		}
+
+		class InitTasks
+		{
+			string[] tasks;
+
+			public InitTasks(string[] args)
+			{
+				tasks = args;
+			}
+
+			public void OnLoad(object sender, EventArgs e)
+			{
+				var form = sender as MainForm;
+				form?.CreateTask(tasks[0]); //Create only the first task
+				form.Load -= OnLoad;
+			}
+		}
+
+		internal void CreateTask(string url)
+		{
+			if (InvokeRequired)
+				Invoke(new Action<string>(CreateTask), url);
+			else
+			{
+				var dc = new DownloadConfig();
+				dc.URL = dc.Referer = url;
+				_cf.Configs.Add(dc);
+				_cf.LastConfigIndex = _cf.Configs.Count - 1;
+				var dialog = new TaskConfigWindow(_cf);
+				dialog.Show(this);
+			}
 		}
 	}
 }
