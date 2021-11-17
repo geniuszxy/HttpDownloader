@@ -56,6 +56,9 @@ namespace HttpDownloader
 		public string Pragma { get; set; } = "no-cache";
 		public string Cache_Control { get; set; } = "no-cache";
 
+		[Category("Proxy")]
+		public string Proxy { get; set; }
+
 		[Category("Main")]
 		public string Host
 		{
@@ -70,6 +73,11 @@ namespace HttpDownloader
 				var uri = new Uri(URL);
 				return uri.Host;
 			}
+
+			set
+			{
+				_host = value;
+			}
 		}
 
 		public HttpWebRequest CreateRequest()
@@ -80,19 +88,21 @@ namespace HttpDownloader
 				req.Host = _host;
 
 			req.Method = Method ?? "GET";
-			if (Referer != null) req.Referer = Referer;
-			if (UserAgent != null) req.UserAgent = UserAgent;
-			if (Accept != null) req.Accept = Accept;
+			if (Referer.HasValue()) req.Referer = Referer;
+			if (UserAgent.HasValue()) req.UserAgent = UserAgent;
+			if (Accept.HasValue()) req.Accept = Accept;
 			if (Connection == "keep-alive") req.KeepAlive = true;
 
 			var headers = req.Headers;
-			if (Sec_Fetch_Dest != null) headers.Add("Sec-Fetch-Dest", Sec_Fetch_Dest);
-			if (Sec_Fetch_Mode != null) headers.Add("Sec-Fetch-Mode", Sec_Fetch_Mode);
-			if (Sec_Fetch_Site != null) headers.Add("Sec-Fetch-Site", Sec_Fetch_Site);
-			if (Cache_Control != null) headers.Add(HttpRequestHeader.CacheControl, Cache_Control);
-			if (Pragma != null) headers.Add(HttpRequestHeader.Pragma, Pragma);
+			if (Sec_Fetch_Dest.HasValue()) headers.Add("Sec-Fetch-Dest", Sec_Fetch_Dest);
+			if (Sec_Fetch_Mode.HasValue()) headers.Add("Sec-Fetch-Mode", Sec_Fetch_Mode);
+			if (Sec_Fetch_Site.HasValue()) headers.Add("Sec-Fetch-Site", Sec_Fetch_Site);
+			if (Cache_Control.HasValue()) headers.Add(HttpRequestHeader.CacheControl, Cache_Control);
+			if (Pragma.HasValue()) headers.Add(HttpRequestHeader.Pragma, Pragma);
 
 			req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+			if(Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
 
 			return req;
 		}
@@ -114,6 +124,14 @@ namespace HttpDownloader
 		public override string ToString()
 		{
 			return URL ?? "Empty Config";
+		}
+	}
+
+	public static class StringUtils
+	{
+		public static bool HasValue(this string str)
+		{
+			return !string.IsNullOrWhiteSpace(str);
 		}
 	}
 }
