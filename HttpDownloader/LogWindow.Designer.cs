@@ -37,7 +37,7 @@
 			this.richTextBox1.Enabled = false;
 			this.richTextBox1.Location = new System.Drawing.Point(0, 0);
 			this.richTextBox1.Name = "richTextBox1";
-			this.richTextBox1.Size = new System.Drawing.Size(284, 262);
+			this.richTextBox1.Size = new System.Drawing.Size(429, 205);
 			this.richTextBox1.TabIndex = 0;
 			this.richTextBox1.Text = "";
 			// 
@@ -45,7 +45,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(284, 262);
+			this.ClientSize = new System.Drawing.Size(429, 205);
 			this.Controls.Add(this.richTextBox1);
 			this.Name = "LogWindow";
 			this.ShowIcon = false;

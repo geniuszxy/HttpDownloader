@@ -27,8 +27,7 @@ namespace HttpDownloader
 				using (var fs = new FileStream(CONFIG_FILE, FileMode.Open))
 					_cf = (ConfigFile)serializer.Deserialize(fs);
 
-				Location = new Point(_cf.X, _cf.Y);
-				Size = new Size(_cf.W, _cf.H);
+				_cf.MainWindow.Apply(this);
 			}
 			else
 				_cf = new ConfigFile();
@@ -80,14 +79,19 @@ namespace HttpDownloader
 			if (_cf == null)
 				_cf = new ConfigFile();
 
-			_cf.X = Location.X;
-			_cf.Y = Location.Y;
-			_cf.W = Width;
-			_cf.H = Height;
+			_cf.MainWindow = new ControlRect(this);
 
+			SaveConfig(_cf);
+		}
+
+		/// <summary>
+		/// To manually save the configure file
+		/// </summary>
+		internal static void SaveConfig(ConfigFile cf)
+		{
 			var serializer = new XmlSerializer(typeof(ConfigFile));
 			using (var fs = new FileStream(CONFIG_FILE, FileMode.Create))
-				serializer.Serialize(fs, _cf);
+				serializer.Serialize(fs, cf);
 		}
 
 		internal void ReportError(Exception ex)

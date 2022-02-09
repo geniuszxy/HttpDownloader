@@ -30,20 +30,22 @@
 		{
 			System.Windows.Forms.ToolStrip toolStrip1;
 			System.Windows.Forms.ToolStripLabel toolStripLabel1;
-			System.Windows.Forms.ToolStripButton toolStripButton1;
-			System.Windows.Forms.ToolStripButton toolStripButton2;
-			System.Windows.Forms.ToolStripButton toolStripButton3;
+			System.Windows.Forms.ToolStripButton tsbNewConfig;
+			System.Windows.Forms.ToolStripButton tsbDelConfig;
+			System.Windows.Forms.ToolStripButton tsbSave;
+			System.Windows.Forms.ToolStripButton tsbStart;
 			System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-			System.Windows.Forms.ToolStripButton toolStripButton4;
+			System.Windows.Forms.ToolStripButton tsbDNS;
 			this.cbbConfigs = new System.Windows.Forms.ToolStripComboBox();
 			this.pgHeader = new System.Windows.Forms.PropertyGrid();
 			toolStrip1 = new System.Windows.Forms.ToolStrip();
 			toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-			toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			toolStripButton3 = new System.Windows.Forms.ToolStripButton();
+			tsbNewConfig = new System.Windows.Forms.ToolStripButton();
+			tsbDelConfig = new System.Windows.Forms.ToolStripButton();
+			tsbSave = new System.Windows.Forms.ToolStripButton();
+			tsbStart = new System.Windows.Forms.ToolStripButton();
 			toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			toolStripButton4 = new System.Windows.Forms.ToolStripButton();
+			tsbDNS = new System.Windows.Forms.ToolStripButton();
 			toolStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -54,14 +56,15 @@
 			toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             toolStripLabel1,
             this.cbbConfigs,
-            toolStripButton1,
-            toolStripButton2,
-            toolStripButton3,
+            tsbNewConfig,
+            tsbDelConfig,
+            tsbSave,
+            tsbStart,
             toolStripSeparator1,
-            toolStripButton4});
+            tsbDNS});
 			toolStrip1.Location = new System.Drawing.Point(0, 0);
 			toolStrip1.Name = "toolStrip1";
-			toolStrip1.Size = new System.Drawing.Size(564, 30);
+			toolStrip1.Size = new System.Drawing.Size(732, 30);
 			toolStrip1.TabIndex = 12;
 			toolStrip1.Text = "toolStrip1";
 			// 
@@ -77,30 +80,38 @@
 			this.cbbConfigs.Size = new System.Drawing.Size(300, 30);
 			this.cbbConfigs.SelectedIndexChanged += new System.EventHandler(this.cbbConfigs_SelectedIndexChanged);
 			// 
-			// toolStripButton1
+			// tsbNewConfig
 			// 
-			toolStripButton1.AutoSize = false;
-			toolStripButton1.Name = "toolStripButton1";
-			toolStripButton1.Size = new System.Drawing.Size(40, 27);
-			toolStripButton1.Text = "+";
-			toolStripButton1.Click += new System.EventHandler(this.btnAddConfig_Click);
+			tsbNewConfig.AutoSize = false;
+			tsbNewConfig.Name = "tsbNewConfig";
+			tsbNewConfig.Size = new System.Drawing.Size(40, 27);
+			tsbNewConfig.Text = "+";
+			tsbNewConfig.Click += new System.EventHandler(this.btnAddConfig_Click);
 			// 
-			// toolStripButton2
+			// tsbDelConfig
 			// 
-			toolStripButton2.AutoSize = false;
-			toolStripButton2.Name = "toolStripButton2";
-			toolStripButton2.Size = new System.Drawing.Size(27, 27);
-			toolStripButton2.Text = "-";
-			toolStripButton2.Click += new System.EventHandler(this.btnRemoveConfig_Click);
+			tsbDelConfig.AutoSize = false;
+			tsbDelConfig.Name = "tsbDelConfig";
+			tsbDelConfig.Size = new System.Drawing.Size(27, 27);
+			tsbDelConfig.Text = "-";
+			tsbDelConfig.Click += new System.EventHandler(this.btnRemoveConfig_Click);
 			// 
-			// toolStripButton3
+			// tsbSave
 			// 
-			toolStripButton3.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-			toolStripButton3.AutoSize = false;
-			toolStripButton3.Name = "toolStripButton3";
-			toolStripButton3.Size = new System.Drawing.Size(60, 27);
-			toolStripButton3.Text = "Start";
-			toolStripButton3.Click += new System.EventHandler(this.btnStart_Click);
+			tsbSave.AutoSize = false;
+			tsbSave.Name = "tsbSave";
+			tsbSave.Size = new System.Drawing.Size(27, 27);
+			tsbSave.Text = "S";
+			tsbSave.Click += new System.EventHandler(this.tsbSave_Click);
+			// 
+			// tsbStart
+			// 
+			tsbStart.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			tsbStart.AutoSize = false;
+			tsbStart.Name = "tsbStart";
+			tsbStart.Size = new System.Drawing.Size(60, 27);
+			tsbStart.Text = "Start";
+			tsbStart.Click += new System.EventHandler(this.btnStart_Click);
 			// 
 			// toolStripSeparator1
 			// 
@@ -108,21 +119,22 @@
 			toolStripSeparator1.Name = "toolStripSeparator1";
 			toolStripSeparator1.Size = new System.Drawing.Size(6, 30);
 			// 
-			// toolStripButton4
+			// tsbDNS
 			// 
-			toolStripButton4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-			toolStripButton4.Name = "toolStripButton4";
-			toolStripButton4.Size = new System.Drawing.Size(38, 27);
-			toolStripButton4.Text = "DNS";
-			toolStripButton4.Click += new System.EventHandler(this.btnDNS_Click);
+			tsbDNS.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			tsbDNS.Name = "tsbDNS";
+			tsbDNS.Size = new System.Drawing.Size(38, 27);
+			tsbDNS.Text = "DNS";
+			tsbDNS.Click += new System.EventHandler(this.btnDNS_Click);
 			// 
 			// pgHeader
 			// 
 			this.pgHeader.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.pgHeader.HelpVisible = false;
 			this.pgHeader.Location = new System.Drawing.Point(0, 30);
+			this.pgHeader.MinimumSize = new System.Drawing.Size(300, 300);
 			this.pgHeader.Name = "pgHeader";
-			this.pgHeader.Size = new System.Drawing.Size(564, 405);
+			this.pgHeader.Size = new System.Drawing.Size(732, 405);
 			this.pgHeader.TabIndex = 11;
 			this.pgHeader.ToolbarVisible = false;
 			// 
@@ -130,7 +142,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(564, 435);
+			this.ClientSize = new System.Drawing.Size(732, 435);
 			this.Controls.Add(this.pgHeader);
 			this.Controls.Add(toolStrip1);
 			this.Name = "TaskConfigWindow";

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,6 +27,7 @@ namespace HttpDownloader
 				cf.Configs.Add(new DownloadConfig());
 			cbbConfigs.Items.AddRange(cf.Configs.ToArray());
 			cbbConfigs.SelectedIndex = cf.LastConfigIndex;
+			cf.TaskWindow.Apply(this);
 		}
 
 		private void btnBrowse_Click(object sender, EventArgs e)
@@ -117,10 +119,38 @@ namespace HttpDownloader
 			}
 		}
 
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+			SetLabelColumnWidth(pgHeader, 120);
+		}
+
+		protected override void OnClosed(EventArgs e)
+		{
+			base.OnClosed(e);
+			_cf.TaskWindow = new ControlRect(this);
+		}
+
+		private void tsbSave_Click(object sender, EventArgs e)
+		{
+			_cf.TaskWindow = new ControlRect(this);
+			MainForm.SaveConfig(_cf);
+		}
+
 		//private void tbURL_TextChanged(object sender, EventArgs e)
 		//{
 		//	if (string.IsNullOrWhiteSpace(tbRefer.Text))
 		//		tbRefer.Text = tbURL.Text;
 		//}
+
+		public static void SetLabelColumnWidth(PropertyGrid grid, int width)
+		{
+			const BindingFlags flag = BindingFlags.Instance | BindingFlags.NonPublic;
+
+			var fi = grid.GetType().GetField("gridView", flag);
+			var view = fi.GetValue(grid);
+			var mi = view.GetType().GetMethod("MoveSplitterTo", flag);
+			mi.Invoke(view, new object[] { width });
+		}
 	}
 }

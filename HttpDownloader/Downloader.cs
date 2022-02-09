@@ -26,7 +26,7 @@ namespace HttpDownloader
 		internal void Start(DownloadConfig config)
 		{
 			this.config = config;
-			lblName.Text = config.URL;
+			lblName.Text = config.Uri.ToString();
 			btnOther.Text = "‖";
 			ThreadPool.QueueUserWorkItem(_Request);
 		}
@@ -55,7 +55,12 @@ namespace HttpDownloader
 			try
 			{
 				FileMode fm = config.Resume ? FileMode.OpenOrCreate : FileMode.Create;
-				using (var output = new FileStream(config.Save, fm, FileAccess.ReadWrite))
+				var fn = _GetSaveFileName();
+				if (fn == null)
+					return;
+
+				config.Save = fn;
+				using (var output = new FileStream(fn, fm, FileAccess.ReadWrite))
 				{
 					var req = request = config.CreateRequest();
 					writeBytes = 0;
@@ -116,11 +121,70 @@ namespace HttpDownloader
 			}
 			catch(Exception ex)
 			{
+				//Console.WriteLine(request.RequestUri);
+				//Console.WriteLine(request.Host);
 				_ReportError(ex);
 			}
 			finally
 			{
 				request = null;
+			}
+		}
+
+		private string _GetSaveFileName()
+		{
+			var fn = config.Save;
+			if (writeBytes > 0) //this is a resume
+				return fn;
+
+			var ow = config.Overwrite;
+			switch (ow)
+			{
+				case OverwriteMethod.Confirm:
+					return !File.Exists(fn) ||
+						MessageBox.Show("Overwrite?" + (config.Resume ? " [Resume]" : ""),
+							"File exists", MessageBoxButtons.YesNo) == DialogResult.Yes ?
+						fn : null;
+
+				case OverwriteMethod.AutoRename:
+					if (File.Exists(fn))
+					{
+						var dir = Path.GetDirectoryName(fn);
+						fn = Path.GetFileName(fn);
+						var ext = Path.GetExtension(fn);
+						fn = Path.GetFileNameWithoutExtension(fn);
+						var p = fn.LastIndexOfAny("-_.".ToCharArray());
+						if(p >= 0 && p < fn.Length - 1)
+						{
+							var prefix = fn.Substring(0, p + 1);
+							var suffix = fn.Substring(p + 1);
+							if(int.TryParse(suffix, out int id))
+							{
+								do
+								{
+									id++;
+									fn = Path.Combine(dir, prefix + id + ext);
+								}
+								while (File.Exists(fn));
+								dir = null;
+							}
+						}
+						if (dir != null)
+						{
+							int id = 0;
+							do
+							{
+								id++;
+								fn = Path.Combine(dir, fn + "-" + id + ext);
+							}
+							while (File.Exists(fn));
+						}
+					}
+					return fn;
+
+				case OverwriteMethod.Replace:
+				default:
+					return fn;
 			}
 		}
 
@@ -179,6 +243,9 @@ namespace HttpDownloader
 			{
 				progress.Text = "Interrupted";
 				SetRetry();
+
+				if (config.AutoRetry)
+					_AutoRetry(0);
 			}
 		}
 
@@ -221,6 +288,21 @@ namespace HttpDownloader
 		{
 			config.Resume = true;
 			btnOther.Text = "↻";
+		}
+
+		private void _AutoRetry(object state)
+		{
+			if (state.Equals(0))
+				ThreadPool.QueueUserWorkItem(_AutoRetry, 1);
+			else
+			{
+				Thread.Sleep(2000);
+
+				if (InvokeRequired)
+					Invoke(new WaitCallback(_AutoRetry), state);
+				else if (config != null)
+					Start(config);
+			}
 		}
 	}
 }

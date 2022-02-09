@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Net;
+using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
 namespace HttpDownloader
@@ -10,11 +12,39 @@ namespace HttpDownloader
 	public class ConfigFile
 	{
 		//Position of the window
-		public int X, Y, W, H;
+		public ControlRect MainWindow;
+		public ControlRect TaskWindow;
 
 		//Saved configs
 		public List<DownloadConfig> Configs = new List<DownloadConfig>();
 		public int LastConfigIndex;
+	}
+
+	[Serializable]
+	public struct ControlRect
+	{
+		public int X, Y, W, H;
+
+		public ControlRect(Control c)
+		{
+			X = c.Location.X;
+			Y = c.Location.Y;
+			W = c.Width;
+			H = c.Height;
+		}
+
+		public void Apply(Control c)
+		{
+			c.Location = new Point(X, Y);
+			c.Size = new Size(W, H);
+		}
+	}
+
+	public enum OverwriteMethod
+	{
+		Replace,
+		Confirm,
+		AutoRename,
 	}
 
 	[Serializable]
@@ -26,7 +56,12 @@ namespace HttpDownloader
 		[Category("Main")]
 		[Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string Save { get; set; }
-		public bool Resume { get; set; } = true;
+		[Category("Config")] public bool Resume { get; set; } = true;
+		[Category("Config")] public bool AutoRetry { get; set; } = true;
+		[Category("Config")] public bool AutoDecompress { get; set; } = true;
+		[Category("Config")] public bool CopyRefer { get; set; } = true;
+		[Category("Config")] public bool ForceSetHost { get; set; } = true;
+		[Category("Config")] public OverwriteMethod Overwrite { get; set; } = OverwriteMethod.Replace;
 
 		[Category("Main")]
 		[RefreshProperties(RefreshProperties.Repaint)]
@@ -42,10 +77,8 @@ namespace HttpDownloader
 				}
 			}
 		}
-		[Category("Main")]
-		public string Method { get; set; } = "GET";
-		[Category("Main")]
-		public string Referer { get; set; }
+		[Category("Main")] public string Method { get; set; } = "GET";
+		[Category("Main")] public string Referer { get; set; }
 		public string UserAgent { get; set; }
 		public string Accept { get; set; } = "video/webm,video/ogg,video/*,application/ogg,audio/*,*/*";
 		public string Connection { get; set; } = "keep-alive";
@@ -56,8 +89,8 @@ namespace HttpDownloader
 		public string Pragma { get; set; } = "no-cache";
 		public string Cache_Control { get; set; } = "no-cache";
 
-		[Category("Proxy")]
-		public string Proxy { get; set; }
+		[Category("Proxy")] public string Proxy { get; set; }
+		[Category("Main")] public string IP { get; set; }
 
 		[Category("Main")]
 		public string Host
@@ -82,13 +115,20 @@ namespace HttpDownloader
 
 		public HttpWebRequest CreateRequest()
 		{
-			var req = (HttpWebRequest)WebRequest.Create(URL);
+			var req = (HttpWebRequest)WebRequest.Create(Uri);
 
 			if (_host != null)
 				req.Host = _host;
+			else if (ForceSetHost)
+				req.Host = Host;
 
 			req.Method = Method ?? "GET";
-			if (Referer.HasValue()) req.Referer = Referer;
+
+			if (Referer.HasValue())
+				req.Referer = Referer;
+			else if (CopyRefer)
+				req.Referer = URL;
+
 			if (UserAgent.HasValue()) req.UserAgent = UserAgent;
 			if (Accept.HasValue()) req.Accept = Accept;
 			if (Connection == "keep-alive") req.KeepAlive = true;
@@ -100,8 +140,7 @@ namespace HttpDownloader
 			if (Cache_Control.HasValue()) headers.Add(HttpRequestHeader.CacheControl, Cache_Control);
 			if (Pragma.HasValue()) headers.Add(HttpRequestHeader.Pragma, Pragma);
 
-			req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
+			if(AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 			if(Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
 
 			return req;
@@ -124,6 +163,21 @@ namespace HttpDownloader
 		public override string ToString()
 		{
 			return URL ?? "Empty Config";
+		}
+
+		internal Uri Uri
+		{
+			get 
+			{
+				if (IP.HasValue())
+				{
+					var ub = new UriBuilder(URL);
+					ub.Host = IP;
+					return ub.Uri;
+				}
+
+				return new Uri(URL);
+			}
 		}
 	}
 
