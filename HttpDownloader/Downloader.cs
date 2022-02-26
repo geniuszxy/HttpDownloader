@@ -17,6 +17,8 @@ namespace HttpDownloader
 		DownloadConfig config;
 		HttpWebRequest request;
 		long writeBytes;
+		int autoRetryCount;
+		string savePath;
 
 		public Downloader()
 		{
@@ -55,12 +57,10 @@ namespace HttpDownloader
 			try
 			{
 				FileMode fm = config.Resume ? FileMode.OpenOrCreate : FileMode.Create;
-				var fn = _GetSaveFileName();
-				if (fn == null)
+				if (!_UpdateSavePath())
 					return;
 
-				config.Save = fn;
-				using (var output = new FileStream(fn, fm, FileAccess.ReadWrite))
+				using (var output = new FileStream(savePath, fm, FileAccess.ReadWrite))
 				{
 					var req = request = config.CreateRequest();
 					writeBytes = 0;
@@ -131,60 +131,107 @@ namespace HttpDownloader
 			}
 		}
 
-		private string _GetSaveFileName()
+		private bool _UpdateSavePath()
 		{
-			var fn = config.Save;
-			if (writeBytes > 0) //this is a resume
-				return fn;
+			if (savePath != null)
+				return true;
 
-			var ow = config.Overwrite;
-			switch (ow)
+			string filename, directory = null;
+
+			if (config.AutoFilename)
+				filename = Path.GetFileName(config.Uri.AbsolutePath);
+			else
+				filename = config.Filename.Trim();
+
+			if (!string.IsNullOrEmpty(filename))
+			{
+				directory = _GetDirectoryFromSave(config.Save);
+				savePath = Path.Combine(directory, filename);
+			}
+			else
+				savePath = config.Save;
+
+			switch (config.Overwrite)
 			{
 				case OverwriteMethod.Confirm:
-					return !File.Exists(fn) ||
-						MessageBox.Show("Overwrite?" + (config.Resume ? " [Resume]" : ""),
-							"File exists", MessageBoxButtons.YesNo) == DialogResult.Yes ?
-						fn : null;
+					//file isn't existed or confirm to overwrite
+					return !File.Exists(savePath) ||
+						MessageBox.Show(
+							"Overwrite?" + (config.Resume ? " [Resume]" : ""),
+							"File exists",
+							MessageBoxButtons.YesNo
+						) == DialogResult.Yes;
 
 				case OverwriteMethod.AutoRename:
-					if (File.Exists(fn))
-					{
-						var dir = Path.GetDirectoryName(fn);
-						fn = Path.GetFileName(fn);
-						var ext = Path.GetExtension(fn);
-						fn = Path.GetFileNameWithoutExtension(fn);
-						var p = fn.LastIndexOfAny("-_.".ToCharArray());
-						if(p >= 0 && p < fn.Length - 1)
-						{
-							var prefix = fn.Substring(0, p + 1);
-							var suffix = fn.Substring(p + 1);
-							if(int.TryParse(suffix, out int id))
-							{
-								do
-								{
-									id++;
-									fn = Path.Combine(dir, prefix + id + ext);
-								}
-								while (File.Exists(fn));
-								dir = null;
-							}
-						}
-						if (dir != null)
-						{
-							int id = 0;
-							do
-							{
-								id++;
-								fn = Path.Combine(dir, fn + "-" + id + ext);
-							}
-							while (File.Exists(fn));
-						}
-					}
-					return fn;
+					if (File.Exists(savePath))
+						_AutoRename(directory, filename);
+					goto default;
 
 				case OverwriteMethod.Replace:
 				default:
-					return fn;
+					return true;
+			}
+		}
+
+		private static string _GetDirectoryFromSave(string save)
+		{
+			if (Directory.Exists(save))
+				return save;
+
+			save = Path.GetDirectoryName(save);
+			if (Directory.Exists(save))
+				return save;
+
+			throw new InvalidDataException("Save doesn't contain a directory: " + save);
+		}
+
+		private void _AutoRename(string dir, string fn)
+		{
+			if (dir == null)
+				dir = Path.GetDirectoryName(config.Save);
+			if (string.IsNullOrEmpty(fn))
+				fn = Path.GetFileName(config.Save);
+
+			var ext = Path.GetExtension(fn);
+			fn = Path.GetFileNameWithoutExtension(fn);
+
+			var p = fn.LastIndexOfAny("-_.".ToCharArray());
+			if (p >= 0 && p < fn.Length - 1)
+			{
+				var prefix = fn.Substring(0, p + 1);
+				var suffix = fn.Substring(p + 1);
+				if (int.TryParse(suffix, out int id))
+				{
+					do
+					{
+						id++;
+						fn = prefix + id + ext;
+						savePath = Path.Combine(dir, fn);
+					}
+					while (File.Exists(savePath));
+					dir = null;
+				}
+			}
+			if (dir != null)
+			{
+				int id = 0;
+				var prefix = fn;
+				do
+				{
+					id++;
+					fn = prefix + "-" + id + ext;
+					savePath = Path.Combine(dir, fn);
+				}
+				while (File.Exists(savePath));
+			}
+
+			//update config
+			if (!config.AutoFilename)
+			{
+				if (!string.IsNullOrWhiteSpace(config.Filename))
+					config.Filename = fn;
+				else
+					config.Save = savePath;
 			}
 		}
 
@@ -242,10 +289,7 @@ namespace HttpDownloader
 			else
 			{
 				progress.Text = "Interrupted";
-				SetRetry();
-
-				if (config.AutoRetry)
-					_AutoRetry(0);
+				_TryRetry();
 			}
 		}
 
@@ -260,7 +304,7 @@ namespace HttpDownloader
 			{
 				progress.Text = "Error";
 				((MainForm)ParentForm).ReportError(ex);
-				SetRetry();
+				_TryRetry();
 			}
 		}
 
@@ -273,6 +317,7 @@ namespace HttpDownloader
 			}
 			else if(config != null)
 			{
+				autoRetryCount = 0;
 				Start(config);
 			}
 		}
@@ -288,6 +333,17 @@ namespace HttpDownloader
 		{
 			config.Resume = true;
 			btnOther.Text = "↻";
+		}
+
+		private void _TryRetry()
+		{
+			SetRetry();
+
+			if (!config.AutoRetry || autoRetryCount >= 5)
+				return;
+
+			autoRetryCount++;
+			_AutoRetry(0);
 		}
 
 		private void _AutoRetry(object state)

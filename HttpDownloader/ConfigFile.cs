@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OrderedPropertyGrid;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -47,24 +48,23 @@ namespace HttpDownloader
 		AutoRename,
 	}
 
-	[Serializable]
-	[DefaultProperty("URL")]
+	[Serializable, DefaultProperty("URL"), TypeConverter(typeof(PropertySorter))]
 	public class DownloadConfig
 	{
 		private string _host, _url;
 
-		[Category("Main")]
-		[Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Category("Main"), PropertyOrder(20), Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
 		public string Save { get; set; }
+		[Category("Main"), PropertyOrder(30)] public string Filename { get; set; }
 		[Category("Config")] public bool Resume { get; set; } = true;
 		[Category("Config")] public bool AutoRetry { get; set; } = true;
 		[Category("Config")] public bool AutoDecompress { get; set; } = true;
 		[Category("Config")] public bool CopyRefer { get; set; } = true;
 		[Category("Config")] public bool ForceSetHost { get; set; } = true;
 		[Category("Config")] public OverwriteMethod Overwrite { get; set; } = OverwriteMethod.Replace;
+		[Category("Config")] public bool AutoFilename { get; set; } = true;
 
-		[Category("Main")]
-		[RefreshProperties(RefreshProperties.Repaint)]
+		[Category("Main"), PropertyOrder(0), RefreshProperties(RefreshProperties.Repaint)]
 		public string URL
 		{
 			get { return _url; }
@@ -77,8 +77,8 @@ namespace HttpDownloader
 				}
 			}
 		}
-		[Category("Main")] public string Method { get; set; } = "GET";
-		[Category("Main")] public string Referer { get; set; }
+		[Category("Main"), PropertyOrder(10)] public string Method { get; set; } = "GET";
+		[Category("Main"), PropertyOrder(40)] public string Referer { get; set; }
 		public string UserAgent { get; set; }
 		public string Accept { get; set; } = "video/webm,video/ogg,video/*,application/ogg,audio/*,*/*";
 		public string Connection { get; set; } = "keep-alive";
@@ -90,9 +90,9 @@ namespace HttpDownloader
 		public string Cache_Control { get; set; } = "no-cache";
 
 		[Category("Proxy")] public string Proxy { get; set; }
-		[Category("Main")] public string IP { get; set; }
+		[Category("Main"), PropertyOrder(2)] public string IP { get; set; }
 
-		[Category("Main")]
+		[Category("Main"), PropertyOrder(1)]
 		public string Host
 		{
 			get

@@ -101,9 +101,12 @@ namespace HttpDownloader
 				_logw = new LogWindow();
 			}
 
-			_logw.Show();
-			_logw.Append(ex.Message);
-			_logw.Append(ex.StackTrace);
+			if (!_logw.Visible)
+			{
+				_logw.Clear();
+				_logw.Show();
+			}
+			_logw.Append(ex.ToString());
 		}
 
 		class InitTasks

@@ -35,5 +35,16 @@ namespace HttpDownloader
 				richTextBox1.ScrollToCaret();
 			}
 		}
+
+		public void Clear()
+		{
+			if (InvokeRequired)
+				Invoke(new Action(Clear));
+			else
+			{
+				richTextBox1.Clear();
+				richTextBox1.ScrollToCaret();
+			}
+		}
 	}
 }
