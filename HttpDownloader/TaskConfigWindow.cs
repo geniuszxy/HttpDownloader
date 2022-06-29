@@ -58,7 +58,8 @@ namespace HttpDownloader
 				return;
 			}
 
-			((MainForm)this.Owner).AddNewTask(dc.Clone());
+			if (Owner is MainForm f)
+				f.TryInvoke(f.AddNewTask, dc.Clone());
 
 			Close();
 		}

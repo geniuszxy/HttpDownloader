@@ -58,18 +58,13 @@
     <Compile Include="DNSWindow.Designer.cs">
       <DependentUpon>DNSWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="LogWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="LogWindow.Designer.cs">
-      <DependentUpon>LogWindow.cs</DependentUpon>
-    </Compile>
     <Compile Include="Downloader.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Downloader.Designer.cs">
       <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
+    <Compile Include="Extension.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,9 +88,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Downloader.resx">
       <DependentUpon>Downloader.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LogWindow.resx">
-      <DependentUpon>LogWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

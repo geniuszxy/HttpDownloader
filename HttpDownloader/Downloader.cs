@@ -9,16 +9,30 @@ using System.Threading;
 using System.IO;
 using System.Net;
 using System.Diagnostics;
+using System.Linq;
 
 namespace HttpDownloader
 {
 	public partial class Downloader : UserControl
 	{
+		enum State
+		{
+			Idle,
+			Start,
+			Request,
+			Download,
+			Complete,
+			Pause,
+			Error,
+			Retry,
+		}
+
 		DownloadConfig config;
 		HttpWebRequest request;
 		long writeBytes;
 		int autoRetryCount;
 		string savePath;
+		State state;
 
 		public Downloader()
 		{
@@ -27,15 +41,24 @@ namespace HttpDownloader
 
 		internal void Start(DownloadConfig config)
 		{
+			state = State.Start;
 			this.config = config;
 			lblName.Text = config.Uri.ToString();
 			btnOther.Text = "‖";
 			ThreadPool.QueueUserWorkItem(_Request);
 		}
 
+		private void Restart()
+		{
+
+		}
+
 		internal void Cancel()
 		{
-			if(request != null)
+			if (state != State.Complete && state != State.Error)
+				state = State.Pause;
+
+			if (request != null)
 			{
 				try
 				{
@@ -71,6 +94,7 @@ namespace HttpDownloader
 							req.AddRange(writeBytes);
 					}
 
+					state = State.Request;
 					using (var resp = (HttpWebResponse)req.GetResponse())
 					{
 						if (resp.StatusCode < HttpStatusCode.OK || resp.StatusCode >= HttpStatusCode.Ambiguous)
@@ -83,13 +107,12 @@ namespace HttpDownloader
 							barStyle = ProgressBarStyle.Continuous;
 							contentLength += writeBytes;
 						}
-						_ReportProgressStyle(barStyle, contentLength);
+						this.TryInvoke(_ReportProgressStyle, barStyle, contentLength);
 
+						state = State.Download;
 						using (Stream respStream = resp.GetResponseStream())
 						{
 							byte[] buffer = new byte[32768]; //32K
-							//var stopWatcher = Stopwatch.StartNew();
-							//var readBytes = 0;
 							do
 							{
 								int read = respStream.Read(buffer, 0, buffer.Length);
@@ -98,19 +121,11 @@ namespace HttpDownloader
 								{
 									output.Write(buffer, 0, read);
 									writeBytes += read;
-									//readBytes += read;
-									//long elapsed = stopWatcher.ElapsedMilliseconds;
-									//if (elapsed >= 1000)
-									//{
-									//	_ReportProgress(readBytes, elapsed);
-									//	stopWatcher.Restart();
-									//	readBytes = 0;
-									//}
-									_ReportProgress(0, 0);
+									this.TryInvoke(_ReportProgress, 0L, 0L);
 								}
 								else
 								{
-									_ReportComplete(contentLength);
+									this.TryInvoke(_ReportComplete, contentLength);
 									return;
 								}
 							}
@@ -121,8 +136,6 @@ namespace HttpDownloader
 			}
 			catch(Exception ex)
 			{
-				//Console.WriteLine(request.RequestUri);
-				//Console.WriteLine(request.Host);
 				_ReportError(ex);
 			}
 			finally
@@ -237,50 +250,30 @@ namespace HttpDownloader
 
 		private void _ReportProgressStyle(ProgressBarStyle style, long maxValue)
 		{
-			if (InvokeRequired)
-				Invoke(new Action<ProgressBarStyle, long>(_ReportProgressStyle), style, maxValue);
-			else
-			{
-				progress.Style = style;
-				if (style != ProgressBarStyle.Marquee)
-					progress.Maximum = (int)maxValue;
-				progress.Value = 0;
-			}
+			progress.Style = style;
+			if (style != ProgressBarStyle.Marquee)
+				progress.Maximum = (int)maxValue;
+			progress.Value = 0;
 		}
 
 		private void _ReportProgress(long read, long dur)
 		{
-			if (InvokeRequired)
-				Invoke(new Action<long, long>(_ReportProgress), read, dur);
-			else
+			string text = "";
+			if (writeBytes <= progress.Maximum)
 			{
-				string text = "";
-				//var bytes = (double)read / dur * 1000.0;
-				//if (bytes > 1048576)
-				//	text = (bytes / 1048576).ToString("0.# MB/s");
-				//else if (bytes > 1024)
-				//	text = (bytes / 1024).ToString("0.# KB/s");
-				//else
-				//	text = bytes.ToString("0.# B/s");
-
-				if (writeBytes <= progress.Maximum)
-				{
-					progress.Value = (int)writeBytes;
-					text = /*text + " " +*/ ((double)writeBytes / progress.Maximum).ToString("0.#%");
-				}
-
-				progress.Text = text;
-				progress.Invalidate();
+				progress.Value = (int)writeBytes;
+				text = ((double)writeBytes / progress.Maximum).ToString("0.##%");
 			}
+
+			progress.Text = text;
+			progress.Invalidate();
 		}
 
 		private void _ReportComplete(long maxValue)
 		{
-			if (InvokeRequired)
-				Invoke(new Action<long>(_ReportComplete), maxValue);
-
-			else if (maxValue <= 0 || writeBytes >= maxValue)
+			if (maxValue <= 0 || writeBytes >= maxValue)
 			{
+				state = State.Complete;
 				progress.Value = progress.Maximum;
 				progress.Text = "Complete";
 				config = null;
@@ -288,60 +281,70 @@ namespace HttpDownloader
 			}
 			else
 			{
+				state = State.Error;
 				progress.Text = "Interrupted";
-				_TryRetry();
+				TryRetry();
 			}
 		}
 
 		private void _ReportError(Exception ex)
 		{
-			if (config == null)
+			if ((state == State.Pause && ex is WebException) || state == State.Complete || config == null)
 				return;
 
-			if (InvokeRequired)
-				Invoke(new Action<Exception>(_ReportError), ex);
-			else if (config != null)
+			state = State.Error;
+			this.TryInvoke(e =>
 			{
 				progress.Text = "Error";
-				((MainForm)ParentForm).ReportError(ex);
-				_TryRetry();
-			}
+				((MainForm)ParentForm).ReportError(e);
+				TryRetry();
+			},
+			ex);
 		}
 
+		//Pause or retry
 		private void btnOther_Click(object sender, EventArgs e)
 		{
-			if(request != null)
+			switch (state)
 			{
-				Cancel();
-				SetRetry();
-			}
-			else if(config != null)
-			{
-				autoRetryCount = 0;
-				Start(config);
+				case State.Start:
+				case State.Request:
+				case State.Download:
+					Cancel();
+					SetRetryButton();
+					break;
+
+				case State.Pause:
+				case State.Error:
+					autoRetryCount = 0;
+					Restart();
+					break;
 			}
 		}
 
+		//Remove
 		private void btnCancel_Click(object sender, EventArgs e)
 		{
 			Cancel();
 			config = null;
-			((MainForm)ParentForm).OnTaskCancelled(this);
+			if(ParentForm is MainForm f)
+				f.OnTaskCancelled(this);
 		}
 
-		private void SetRetry()
+		private void SetRetryButton()
 		{
 			config.Resume = true;
 			btnOther.Text = "↻";
 		}
 
-		private void _TryRetry()
+		private void TryRetry()
 		{
-			SetRetry();
+			SetRetryButton();
 
 			if (!config.AutoRetry || autoRetryCount >= 5)
 				return;
 
+			state = State.Retry;
 			autoRetryCount++;
 			_AutoRetry(0);
 		}

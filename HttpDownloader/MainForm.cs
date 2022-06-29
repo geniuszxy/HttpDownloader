@@ -15,7 +15,6 @@ namespace HttpDownloader
 	{
 		const string CONFIG_FILE = "config.xml";
 		ConfigFile _cf;
-		LogWindow _logw;
 
 		public MainForm(string[] args)
 		{
@@ -43,19 +42,14 @@ namespace HttpDownloader
 		/// </summary>
 		internal void AddNewTask(DownloadConfig config)
 		{
-			if (InvokeRequired)
-				Invoke(new Action<DownloadConfig>(AddNewTask), config);
-			else
+			var d = new Downloader
 			{
-				var d = new Downloader
-				{
-					Height = 50,
-					Dock = DockStyle.Top,
-				};
-				Controls.Add(d);
-				d.BringToFront();
-				d.Start(config);
-			}
+				Height = 50,
+				Dock = DockStyle.Top,
+			};
+			mainContainer.Panel1.Controls.Add(d);
+			d.BringToFront();
+			d.Start(config);
 		}
 
 		private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -66,12 +60,7 @@ namespace HttpDownloader
 
 		internal void OnTaskCancelled(Downloader downloader)
 		{
-			if (InvokeRequired)
-				Invoke(new Action<Downloader>(OnTaskCancelled), downloader);
-			else
-			{
-				Controls.Remove(downloader);
-			}
+			mainContainer.Panel1.Controls.Remove(downloader);
 		}
 
 		private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -96,17 +85,14 @@ namespace HttpDownloader
 
 		internal void ReportError(Exception ex)
 		{
-			if(_logw == null)
-			{
-				_logw = new LogWindow();
-			}
+			this.TryInvoke(AppendLog, ex.ToString());
+		}
 
-			if (!_logw.Visible)
-			{
-				_logw.Clear();
-				_logw.Show();
-			}
-			_logw.Append(ex.ToString());
+		private void ConsoleCheckedChanged(object sender, EventArgs e)
+		{
+			var on = consoleToolStripMenuItem.Checked;
+			mainContainer.Panel2Collapsed = !on;
+			consoleToolStripMenuItem.Text = (on ? "*" : "") + "&Console";
 		}
 
 		class InitTasks
@@ -120,25 +106,37 @@ namespace HttpDownloader
 
 			public void OnLoad(object sender, EventArgs e)
 			{
-				var form = sender as MainForm;
-				form?.CreateTask(tasks[0]); //Create only the first task
-				form.Load -= OnLoad;
+				if (sender is MainForm form)
+				{
+					form.TryInvoke(form.CreateTask, tasks[0]); //Create only the first task
+					form.Load -= OnLoad;
+				}
 			}
 		}
 
 		internal void CreateTask(string url)
 		{
-			if (InvokeRequired)
-				Invoke(new Action<string>(CreateTask), url);
-			else
-			{
-				var dc = new DownloadConfig();
-				dc.URL = dc.Referer = url;
-				_cf.Configs.Add(dc);
-				_cf.LastConfigIndex = _cf.Configs.Count - 1;
-				var dialog = new TaskConfigWindow(_cf);
-				dialog.Show(this);
-			}
+			var dc = new DownloadConfig();
+			dc.URL = dc.Referer = url;
+			_cf.Configs.Add(dc);
+			_cf.LastConfigIndex = _cf.Configs.Count - 1;
+			var dialog = new TaskConfigWindow(_cf);
+			dialog.Show(this);
+		}
+
+		private void AppendLog(string text)
+		{
+			consoleToolStripMenuItem.Checked = true;
+			if (log.TextLength > 0)
+				log.AppendText("\n");
+			log.AppendText(text);
+			log.ScrollToCaret();
+		}
+
+		private void ClearLog()
+		{
+			log.Clear();
+			log.ScrollToCaret();
 		}
 	}
 }
