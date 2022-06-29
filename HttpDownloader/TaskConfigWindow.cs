@@ -113,7 +113,7 @@ namespace HttpDownloader
 				var result = w.ShowDialog(this);
 				if (result == DialogResult.OK)
 				{
-					dc.SetIPAddress(w.SelectedAddress);
+					dc.IP = w.SelectedAddress.ToString();
 					pgHeader.Refresh();
 				}
 			}

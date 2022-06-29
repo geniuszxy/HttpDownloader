@@ -146,15 +146,6 @@ namespace HttpDownloader
 			return req;
 		}
 
-		internal void SetIPAddress(IPAddress addr)
-		{
-			var uri = new UriBuilder(URL);
-			var host = uri.Host;
-			uri.Host = addr.ToString();
-			URL = uri.ToString(); //change _host
-			_host = host; //replace with the real host
-		}
-
 		public DownloadConfig Clone()
 		{
 			return (DownloadConfig)MemberwiseClone();
