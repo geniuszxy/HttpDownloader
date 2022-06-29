@@ -10,6 +10,7 @@ using System.IO;
 using System.Net;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace HttpDownloader
 {
@@ -346,22 +347,12 @@ namespace HttpDownloader
 
 			state = State.Retry;
 			autoRetryCount++;
-			_AutoRetry(0);
-		}
-
-		private void _AutoRetry(object state)
-		{
-			if (state.Equals(0))
-				ThreadPool.QueueUserWorkItem(_AutoRetry, 1);
-			else
+			this.TryInvoke(async () =>
 			{
-				Thread.Sleep(2000);
-
-				if (InvokeRequired)
-					Invoke(new WaitCallback(_AutoRetry), state);
-				else if (config != null)
-					Start(config);
-			}
+				await Task.Delay(2000);
+				if (config != null)
+					Restart();
+			});
 		}
 	}
 }
