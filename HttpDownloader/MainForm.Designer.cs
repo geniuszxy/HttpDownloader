@@ -34,6 +34,7 @@
 			this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.mainContainer = new System.Windows.Forms.SplitContainer();
 			this.log = new System.Windows.Forms.RichTextBox();
+			this.configToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			menuStrip1 = new System.Windows.Forms.MenuStrip();
 			menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.mainContainer)).BeginInit();
@@ -45,7 +46,8 @@
 			// 
 			menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripMenuItem,
-            this.consoleToolStripMenuItem});
+            this.consoleToolStripMenuItem,
+            this.configToolStripMenuItem});
 			menuStrip1.Location = new System.Drawing.Point(0, 0);
 			menuStrip1.Name = "menuStrip1";
 			menuStrip1.Size = new System.Drawing.Size(626, 25);
@@ -57,7 +59,7 @@
 			this.newToolStripMenuItem.Name = "newToolStripMenuItem";
 			this.newToolStripMenuItem.Size = new System.Drawing.Size(46, 21);
 			this.newToolStripMenuItem.Text = "&New";
-			this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
+			this.newToolStripMenuItem.Click += new System.EventHandler(this.NewToolStripMenuItem_Click);
 			// 
 			// consoleToolStripMenuItem
 			// 
@@ -96,6 +98,14 @@
 			this.log.TabIndex = 0;
 			this.log.Text = "";
 			// 
+			// configToolStripMenuItem
+			// 
+			this.configToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			this.configToolStripMenuItem.Name = "configToolStripMenuItem";
+			this.configToolStripMenuItem.Size = new System.Drawing.Size(58, 21);
+			this.configToolStripMenuItem.Text = "Config";
+			this.configToolStripMenuItem.Click += new System.EventHandler(this.ConfigToolStripMenuItem_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -124,6 +134,7 @@
 		private System.Windows.Forms.ToolStripMenuItem consoleToolStripMenuItem;
 		private System.Windows.Forms.SplitContainer mainContainer;
 		private System.Windows.Forms.RichTextBox log;
+		private System.Windows.Forms.ToolStripMenuItem configToolStripMenuItem;
 	}
 }
 

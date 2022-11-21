@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HttpDownloader</RootNamespace>
     <AssemblyName>HttpDownloader</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -65,6 +65,12 @@
       <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
     <Compile Include="Extension.cs" />
+    <Compile Include="MainConfigWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainConfigWindow.Designer.cs">
+      <DependentUpon>MainConfigWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,6 +94,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Downloader.resx">
       <DependentUpon>Downloader.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainConfigWindow.resx">
+      <DependentUpon>MainConfigWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

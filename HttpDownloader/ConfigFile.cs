@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Net;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
@@ -19,6 +20,8 @@ namespace HttpDownloader
 		//Saved configs
 		public List<DownloadConfig> Configs = new List<DownloadConfig>();
 		public int LastConfigIndex;
+		[Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
+		public string FFMpegPath { get; set; }
 	}
 
 	[Serializable]
@@ -53,7 +56,8 @@ namespace HttpDownloader
 	{
 		private string _host, _url;
 
-		[Category("Main"), PropertyOrder(20), Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Category("Main"), PropertyOrder(0)] public string Name { get; set; }
+		[Category("Main"), PropertyOrder(20), Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
 		public string Save { get; set; }
 		[Category("Main"), PropertyOrder(30)] public string Filename { get; set; }
 		[Category("Config")] public bool Resume { get; set; } = true;
@@ -64,7 +68,7 @@ namespace HttpDownloader
 		[Category("Config")] public OverwriteMethod Overwrite { get; set; } = OverwriteMethod.Replace;
 		[Category("Config")] public bool AutoFilename { get; set; } = true;
 
-		[Category("Main"), PropertyOrder(0), RefreshProperties(RefreshProperties.Repaint)]
+		[Category("Main"), PropertyOrder(1), RefreshProperties(RefreshProperties.Repaint)]
 		public string URL
 		{
 			get { return _url; }
@@ -153,7 +157,7 @@ namespace HttpDownloader
 
 		public override string ToString()
 		{
-			return URL ?? "Empty Config";
+			return string.IsNullOrEmpty(Name) ? (URL ?? "Empty Config") : Name;
 		}
 
 		internal Uri Uri
