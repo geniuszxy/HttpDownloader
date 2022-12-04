@@ -74,7 +74,7 @@ namespace HttpDownloader
 			get { return _url; }
 			set
 			{
-				if(value != _url)
+				if (value != _url)
 				{
 					_url = value;
 					_host = null;
@@ -144,36 +144,24 @@ namespace HttpDownloader
 			if (Cache_Control.HasValue()) headers.Add(HttpRequestHeader.CacheControl, Cache_Control);
 			if (Pragma.HasValue()) headers.Add(HttpRequestHeader.Pragma, Pragma);
 
-			if(AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			if(Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
+			if (AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+			if (Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
 
 			return req;
 		}
 
 		public DownloadConfig Clone()
-		{
-			return (DownloadConfig)MemberwiseClone();
-		}
+			=> (DownloadConfig)MemberwiseClone();
 
 		public override string ToString()
-		{
-			return string.IsNullOrEmpty(Name) ? (URL ?? "Empty Config") : Name;
-		}
+			=> string.IsNullOrEmpty(Name) ? 
+			(URL ?? "Empty Config") :
+			Name;
 
-		internal Uri Uri
-		{
-			get 
-			{
-				if (IP.HasValue())
-				{
-					var ub = new UriBuilder(URL);
-					ub.Host = IP;
-					return ub.Uri;
-				}
-
-				return new Uri(URL);
-			}
-		}
+		internal Uri Uri 
+			=> IP.HasValue() ?
+			new UriBuilder(URL) { Host = IP }.Uri :
+			new Uri(URL);
 	}
 
 	public static class StringUtils

@@ -42,16 +42,16 @@ namespace HttpDownloader
 
 		internal void Start(DownloadConfig config)
 		{
-			state = State.Start;
 			this.config = config;
-			lblName.Text = config.Uri.ToString();
-			btnOther.Text = "‖";
-			ThreadPool.QueueUserWorkItem(_Request);
+			Restart();
 		}
 
 		private void Restart()
 		{
-
+			state = State.Start;
+			lblName.Text = config.Uri.ToString();
+			btnOther.Text = "‖";
+			ThreadPool.QueueUserWorkItem(_Request);
 		}
 
 		internal void Cancel()

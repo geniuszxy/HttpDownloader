@@ -65,6 +65,9 @@
       <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
     <Compile Include="Extension.cs" />
+    <Compile Include="M3U8Downloader.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MainConfigWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -128,6 +131,7 @@
   <ItemGroup>
     <Content Include="HttpDownloader.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
