@@ -7,13 +7,18 @@ using System.Threading.Tasks;
 
 namespace HttpDownloader
 {
-	class M3U8Downloader : Process
+	class M3U8Downloader : Downloader
+	{
+
+	}
+
+	class M3U8DownloadProcess : Process
 	{
 		private string _lastLine = string.Empty;
 		private double _duration = -1.0;
 		private double _progress;
 
-		public M3U8Downloader(string ffmpeg, string url, string output, string proxy)
+		public M3U8DownloadProcess(string ffmpeg, string url, string output, string proxy)
 		{
 			var si = StartInfo;
 
@@ -81,5 +86,8 @@ namespace HttpDownloader
 			var ts = TimeSpan.ParseExact(text, "h:m:s.ff", null);
 			return ts.TotalSeconds;
 		}
+
+		public string LastLine => _lastLine;
+		public double Progress => _progress;
 	}
 }

@@ -38,7 +38,7 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>HttpDownloader.ico</ApplicationIcon>
+    <ApplicationIcon>Main\HttpDownloader.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -51,57 +51,62 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigFile.cs" />
-    <Compile Include="DNSWindow.cs">
+    <Compile Include="Main\ConfigFile.cs" />
+    <Compile Include="Windows\DNSWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DNSWindow.Designer.cs">
+    <Compile Include="Windows\DNSWindow.Designer.cs">
       <DependentUpon>DNSWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Downloader.cs">
+    <Compile Include="Controls\Downloader.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Downloader.Designer.cs">
+    <Compile Include="Controls\Downloader.Designer.cs">
       <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
-    <Compile Include="Extension.cs" />
-    <Compile Include="M3U8Downloader.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Helpers\Extension.cs" />
+    <Compile Include="Controls\HttpDownloader.cs">
+      <SubType>UserControl</SubType>
+      <DependentUpon>Downloader.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainConfigWindow.cs">
+    <Compile Include="Controls\M3U8Downloader.cs">
+      <SubType>UserControl</SubType>
+      <DependentUpon>Downloader.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\MainConfigWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainConfigWindow.Designer.cs">
+    <Compile Include="Windows\MainConfigWindow.Designer.cs">
       <DependentUpon>MainConfigWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="Main\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="Main\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyProgressBar.cs">
+    <Compile Include="Controls\MyProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="Main\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertySorter.cs" />
-    <Compile Include="TaskConfigWindow.cs">
+    <Compile Include="Helpers\PropertySorter.cs" />
+    <Compile Include="Windows\TaskConfigWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TaskConfigWindow.Designer.cs">
+    <Compile Include="Windows\TaskConfigWindow.Designer.cs">
       <DependentUpon>TaskConfigWindow.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="DNSWindow.resx">
+    <EmbeddedResource Include="Windows\DNSWindow.resx">
       <DependentUpon>DNSWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Downloader.resx">
+    <EmbeddedResource Include="Controls\Downloader.resx">
       <DependentUpon>Downloader.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainConfigWindow.resx">
+    <EmbeddedResource Include="Windows\MainConfigWindow.resx">
       <DependentUpon>MainConfigWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="Main\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -114,7 +119,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="TaskConfigWindow.resx">
+    <EmbeddedResource Include="Windows\TaskConfigWindow.resx">
       <DependentUpon>TaskConfigWindow.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
@@ -129,7 +134,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="HttpDownloader.ico" />
+    <Content Include="Main\HttpDownloader.ico" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
