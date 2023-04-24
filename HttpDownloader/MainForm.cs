@@ -138,5 +138,10 @@ namespace HttpDownloader
 			log.Clear();
 			log.ScrollToCaret();
 		}
+
+		private void cleanToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+
+		}
 	}
 }
