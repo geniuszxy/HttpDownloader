@@ -28,5 +28,18 @@ namespace HttpDownloader
 			else
 				a(p1, p2);
 		}
+
+		public static string FindBetween(this string s, string start, string end, int offset = 0)
+		{
+			int startPos = s.IndexOf(start, offset);
+			if (startPos < 0)
+				return null;
+
+			int endPos = s.IndexOf(end, startPos += start.Length);
+			if (endPos < 0)
+				return null;
+
+			return s.Substring(startPos, endPos - startPos);
+		}
 	}
 }

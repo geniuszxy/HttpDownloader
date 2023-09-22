@@ -31,7 +31,7 @@
 			this.lblName = new System.Windows.Forms.Label();
 			this.btnCancel = new System.Windows.Forms.Button();
 			this.btnOther = new System.Windows.Forms.Button();
-			this.progress = new HttpDownloader.MyProgressBar();
+			this.progress = new MyProgressBar();
 			this.SuspendLayout();
 			// 
 			// lblName
@@ -41,7 +41,7 @@
 			this.lblName.Font = new System.Drawing.Font("Microsoft YaHei", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
 			this.lblName.Location = new System.Drawing.Point(3, 3);
 			this.lblName.Name = "lblName";
-			this.lblName.Size = new System.Drawing.Size(218, 17);
+			this.lblName.Size = new System.Drawing.Size(241, 17);
 			this.lblName.TabIndex = 0;
 			this.lblName.Text = "Name";
 			// 
@@ -52,7 +52,7 @@
 			this.btnCancel.FlatAppearance.BorderSize = 0;
 			this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnCancel.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-			this.btnCancel.Location = new System.Drawing.Point(265, 3);
+			this.btnCancel.Location = new System.Drawing.Point(288, 3);
 			this.btnCancel.Name = "btnCancel";
 			this.btnCancel.Size = new System.Drawing.Size(32, 44);
 			this.btnCancel.TabIndex = 3;
@@ -67,7 +67,7 @@
 			this.btnOther.FlatAppearance.BorderSize = 0;
 			this.btnOther.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnOther.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-			this.btnOther.Location = new System.Drawing.Point(227, 3);
+			this.btnOther.Location = new System.Drawing.Point(250, 3);
 			this.btnOther.Name = "btnOther";
 			this.btnOther.Size = new System.Drawing.Size(32, 44);
 			this.btnOther.TabIndex = 2;
@@ -82,7 +82,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.progress.Location = new System.Drawing.Point(6, 23);
 			this.progress.Name = "progress";
-			this.progress.Size = new System.Drawing.Size(215, 24);
+			this.progress.Size = new System.Drawing.Size(238, 24);
 			this.progress.TabIndex = 1;
 			// 
 			// Downloader
@@ -95,7 +95,7 @@
 			this.Controls.Add(this.lblName);
 			this.Margin = new System.Windows.Forms.Padding(0);
 			this.Name = "Downloader";
-			this.Size = new System.Drawing.Size(300, 50);
+			this.Size = new System.Drawing.Size(323, 50);
 			this.ResumeLayout(false);
 
 		}

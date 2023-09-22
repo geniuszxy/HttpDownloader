@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Net;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
@@ -19,6 +20,8 @@ namespace HttpDownloader
 		//Saved configs
 		public List<DownloadConfig> Configs = new List<DownloadConfig>();
 		public int LastConfigIndex;
+		[Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
+		public string FFMpegPath { get; set; }
 	}
 
 	[Serializable]
@@ -53,7 +56,8 @@ namespace HttpDownloader
 	{
 		private string _host, _url;
 
-		[Category("Main"), PropertyOrder(20), Editor(typeof(FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+		[Category("Main"), PropertyOrder(0)] public string Name { get; set; }
+		[Category("Main"), PropertyOrder(20), Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
 		public string Save { get; set; }
 		[Category("Main"), PropertyOrder(30)] public string Filename { get; set; }
 		[Category("Config")] public bool Resume { get; set; } = true;
@@ -64,13 +68,13 @@ namespace HttpDownloader
 		[Category("Config")] public OverwriteMethod Overwrite { get; set; } = OverwriteMethod.Replace;
 		[Category("Config")] public bool AutoFilename { get; set; } = true;
 
-		[Category("Main"), PropertyOrder(0), RefreshProperties(RefreshProperties.Repaint)]
+		[Category("Main"), PropertyOrder(1), RefreshProperties(RefreshProperties.Repaint)]
 		public string URL
 		{
 			get { return _url; }
 			set
 			{
-				if(value != _url)
+				if (value != _url)
 				{
 					_url = value;
 					_host = null;
@@ -88,6 +92,7 @@ namespace HttpDownloader
 		public string Sec_Fetch_Site { get; set; } = "same-origin";
 		public string Pragma { get; set; } = "no-cache";
 		public string Cache_Control { get; set; } = "no-cache";
+		public string Cookie { get; set; }
 
 		[Category("Proxy")] public string Proxy { get; set; }
 		[Category("Main"), PropertyOrder(2)] public string IP { get; set; }
@@ -115,7 +120,8 @@ namespace HttpDownloader
 
 		public HttpWebRequest CreateRequest()
 		{
-			var req = (HttpWebRequest)WebRequest.Create(Uri);
+			var uri = Uri;
+			var req = (HttpWebRequest)WebRequest.Create(uri);
 
 			if (_host != null)
 				req.Host = _host;
@@ -140,36 +146,26 @@ namespace HttpDownloader
 			if (Cache_Control.HasValue()) headers.Add(HttpRequestHeader.CacheControl, Cache_Control);
 			if (Pragma.HasValue()) headers.Add(HttpRequestHeader.Pragma, Pragma);
 
-			if(AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			if(Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
+			if (AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+			if (Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
+
+			if (Cookie.HasValue()) req.CookieContainer.SetCookies(uri, Cookie);
 
 			return req;
 		}
 
 		public DownloadConfig Clone()
-		{
-			return (DownloadConfig)MemberwiseClone();
-		}
+			=> (DownloadConfig)MemberwiseClone();
 
 		public override string ToString()
-		{
-			return URL ?? "Empty Config";
-		}
+			=> string.IsNullOrEmpty(Name) ? 
+			(URL ?? "Empty Config") :
+			Name;
 
-		internal Uri Uri
-		{
-			get 
-			{
-				if (IP.HasValue())
-				{
-					var ub = new UriBuilder(URL);
-					ub.Host = IP;
-					return ub.Uri;
-				}
-
-				return new Uri(URL);
-			}
-		}
+		internal Uri Uri 
+			=> IP.HasValue() ?
+			new UriBuilder(URL) { Host = IP }.Uri :
+			new Uri(URL);
 	}
 
 	public static class StringUtils

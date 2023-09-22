@@ -34,6 +34,7 @@ namespace HttpDownloader
 		int autoRetryCount;
 		string savePath;
 		State state;
+		public bool IsComplete => state == State.Complete;
 
 		public Downloader()
 		{

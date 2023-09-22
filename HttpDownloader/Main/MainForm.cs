@@ -52,10 +52,16 @@ namespace HttpDownloader
 			d.Start(config);
 		}
 
-		private void newToolStripMenuItem_Click(object sender, EventArgs e)
+		private void NewToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			var dialog = new TaskConfigWindow(_cf);
 			dialog.Show(this);
+		}
+
+		private void ConfigToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			var dialog = new MainConfigWindow(_cf);
+			dialog.ShowDialog(this);
 		}
 
 		internal void OnTaskCancelled(Downloader downloader)
@@ -93,6 +99,25 @@ namespace HttpDownloader
 			var on = consoleToolStripMenuItem.Checked;
 			mainContainer.Panel2Collapsed = !on;
 			consoleToolStripMenuItem.Text = (on ? "*" : "") + "&Console";
+			if (!on)
+				ClearLog();
+		}
+
+		private void OnClean(object sender, EventArgs e)
+		{
+			var panel = mainContainer.Panel1;
+			var controls = panel.Controls;
+			panel.SuspendLayout();
+			{
+				var removeList = new List<Control>();
+				foreach (Downloader control in controls)
+					if (control.IsComplete)
+						removeList.Add(control);
+				foreach (var control in removeList)
+					controls.Remove(control);
+				removeList.Clear();
+			}
+			panel.ResumeLayout(true);
 		}
 
 		class InitTasks
@@ -137,11 +162,6 @@ namespace HttpDownloader
 		{
 			log.Clear();
 			log.ScrollToCaret();
-		}
-
-		private void cleanToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-
 		}
 	}
 }

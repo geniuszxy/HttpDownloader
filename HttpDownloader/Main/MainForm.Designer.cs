@@ -32,9 +32,10 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.cleanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.configToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.mainContainer = new System.Windows.Forms.SplitContainer();
 			this.log = new System.Windows.Forms.RichTextBox();
-			this.cleanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			menuStrip1 = new System.Windows.Forms.MenuStrip();
 			menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.mainContainer)).BeginInit();
@@ -47,7 +48,8 @@
 			menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripMenuItem,
             this.consoleToolStripMenuItem,
-            this.cleanToolStripMenuItem});
+            this.cleanToolStripMenuItem,
+            this.configToolStripMenuItem});
 			menuStrip1.Location = new System.Drawing.Point(0, 0);
 			menuStrip1.Name = "menuStrip1";
 			menuStrip1.Size = new System.Drawing.Size(626, 25);
@@ -59,7 +61,7 @@
 			this.newToolStripMenuItem.Name = "newToolStripMenuItem";
 			this.newToolStripMenuItem.Size = new System.Drawing.Size(46, 21);
 			this.newToolStripMenuItem.Text = "&New";
-			this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
+			this.newToolStripMenuItem.Click += new System.EventHandler(this.NewToolStripMenuItem_Click);
 			// 
 			// consoleToolStripMenuItem
 			// 
@@ -71,6 +73,22 @@
 			this.consoleToolStripMenuItem.Size = new System.Drawing.Size(72, 21);
 			this.consoleToolStripMenuItem.Text = "*&Console";
 			this.consoleToolStripMenuItem.CheckedChanged += new System.EventHandler(this.ConsoleCheckedChanged);
+			// 
+			// cleanToolStripMenuItem
+			// 
+			this.cleanToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			this.cleanToolStripMenuItem.Name = "cleanToolStripMenuItem";
+			this.cleanToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
+			this.cleanToolStripMenuItem.Text = "Clean(&K)";
+			this.cleanToolStripMenuItem.Click += new System.EventHandler(this.OnClean);
+			// 
+			// configToolStripMenuItem
+			// 
+			this.configToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			this.configToolStripMenuItem.Name = "configToolStripMenuItem";
+			this.configToolStripMenuItem.Size = new System.Drawing.Size(58, 21);
+			this.configToolStripMenuItem.Text = "Con&fig";
+			this.configToolStripMenuItem.Click += new System.EventHandler(this.ConfigToolStripMenuItem_Click);
 			// 
 			// mainContainer
 			// 
@@ -97,14 +115,6 @@
 			this.log.Size = new System.Drawing.Size(626, 201);
 			this.log.TabIndex = 0;
 			this.log.Text = "";
-			// 
-			// cleanToolStripMenuItem
-			// 
-			this.cleanToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-			this.cleanToolStripMenuItem.Name = "cleanToolStripMenuItem";
-			this.cleanToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
-			this.cleanToolStripMenuItem.Text = "Clean(&K)";
-			this.cleanToolStripMenuItem.Click += new System.EventHandler(this.cleanToolStripMenuItem_Click);
 			// 
 			// MainForm
 			// 
@@ -135,6 +145,7 @@
 		private System.Windows.Forms.SplitContainer mainContainer;
 		private System.Windows.Forms.RichTextBox log;
 		private System.Windows.Forms.ToolStripMenuItem cleanToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem configToolStripMenuItem;
 	}
 }
 
