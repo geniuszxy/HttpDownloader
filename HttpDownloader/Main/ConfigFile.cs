@@ -149,7 +149,11 @@ namespace HttpDownloader
 			if (AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 			if (Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
 
-			if (Cookie.HasValue()) req.CookieContainer.SetCookies(uri, Cookie);
+			if (Cookie.HasValue())
+			{
+				req.CookieContainer = new CookieContainer();
+				req.CookieContainer.SetCookies(uri, Cookie);
+			}
 
 			return req;
 		}
