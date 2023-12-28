@@ -93,6 +93,7 @@ namespace HttpDownloader
 		public string Pragma { get; set; } = "no-cache";
 		public string Cache_Control { get; set; } = "no-cache";
 		public string Cookie { get; set; }
+		public bool Debug { get; set; } = false;
 
 		[Category("Proxy")] public string Proxy { get; set; }
 		[Category("Main"), PropertyOrder(2)] public string IP { get; set; }

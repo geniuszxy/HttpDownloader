@@ -36,9 +36,13 @@ namespace HttpDownloader
 		State state;
 		public bool IsComplete => state == State.Complete;
 
+		private int requestCount;
+		private StreamWriter debugOutput;
+
 		public Downloader()
 		{
 			InitializeComponent();
+			requestCount = 0;
 		}
 
 		internal void Start(DownloadConfig config)
@@ -96,12 +100,14 @@ namespace HttpDownloader
 							req.AddRange(writeBytes);
 					}
 
+					_StartDebug();
 					state = State.Request;
 					using (var resp = (HttpWebResponse)req.GetResponse())
 					{
 						if (resp.StatusCode < HttpStatusCode.OK || resp.StatusCode >= HttpStatusCode.Ambiguous)
 							throw new Exception("Http status: " + resp.StatusCode);
 
+						_DebugResponse(resp);
 						long contentLength = resp.ContentLength;
 						ProgressBarStyle barStyle = ProgressBarStyle.Marquee;
 						if (contentLength > 0)
@@ -118,6 +124,7 @@ namespace HttpDownloader
 							do
 							{
 								int read = respStream.Read(buffer, 0, buffer.Length);
+								_DebugResponseData(buffer, read);
 
 								if (read > 0)
 								{
@@ -143,6 +150,7 @@ namespace HttpDownloader
 			finally
 			{
 				request = null;
+				_DebugSave();
 			}
 		}
 
@@ -354,6 +362,60 @@ namespace HttpDownloader
 				if (config != null)
 					Restart();
 			});
+		}
+
+		private void _StartDebug()
+		{
+			if (!config.Debug)
+				return;
+
+			var debugOutputPath = $"{savePath}.{requestCount}.log";
+			requestCount++;
+			debugOutput = new StreamWriter(debugOutputPath, false, Encoding.GetEncoding("UTF-8"));
+
+			//writer request header
+			var headers = request.Headers;
+			debugOutput.WriteLine("[Request]");
+			foreach (string key in headers)
+				debugOutput.WriteLine($"{key}: {headers[key]}");
+			debugOutput.WriteLine();
+		}
+
+		private void _DebugResponse(HttpWebResponse resp)
+		{
+			if (!config.Debug)
+				return;
+
+			var headers = resp.Headers;
+			debugOutput.WriteLine("[Response]");
+			foreach (string key in headers)
+				debugOutput.WriteLine($"{key}: {headers[key]}");
+			debugOutput.WriteLine();
+		}
+
+		private void _DebugResponseData(byte[] buffer, int read)
+		{
+			if (!config.Debug)
+				return;
+
+			int offset = 0;
+			while(read > 32)
+			{
+				read -= 32;
+				debugOutput.WriteLine(BitConverter.ToString(buffer, offset, 32));
+				offset += 32;
+			}
+			if(read > 0)
+				debugOutput.WriteLine(BitConverter.ToString(buffer, offset, read));
+		}
+
+		private void _DebugSave()
+		{
+			if (debugOutput == null)
+				return;
+
+			debugOutput.Close();
+			debugOutput = null;
 		}
 	}
 }
