@@ -83,6 +83,7 @@ namespace HttpDownloader
 		}
 		[Category("Main"), PropertyOrder(10)] public string Method { get; set; } = "GET";
 		[Category("Main"), PropertyOrder(40)] public string Referer { get; set; }
+		[Category("Main"), PropertyOrder(41)] public string Origin { get; set; }
 		public string UserAgent { get; set; }
 		public string Accept { get; set; } = "video/webm,video/ogg,video/*,application/ogg,audio/*,*/*";
 		public string Connection { get; set; } = "keep-alive";
@@ -146,6 +147,7 @@ namespace HttpDownloader
 			if (Sec_Fetch_Site.HasValue()) headers.Add("Sec-Fetch-Site", Sec_Fetch_Site);
 			if (Cache_Control.HasValue()) headers.Add(HttpRequestHeader.CacheControl, Cache_Control);
 			if (Pragma.HasValue()) headers.Add(HttpRequestHeader.Pragma, Pragma);
+			if (Origin.HasValue()) headers.Add("Origin", Origin);
 
 			if (AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 			if (Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
