@@ -45,7 +45,7 @@ namespace HttpDownloader
 		private void btnStart_Click(object sender, EventArgs e)
 		{
 			var dc = (DownloadConfig)cbbConfigs.SelectedItem;
-			
+
 			if (string.IsNullOrWhiteSpace(dc.URL))
 			{
 				MessageBox.Show("必须输入网址");
@@ -59,7 +59,12 @@ namespace HttpDownloader
 			}
 
 			if (Owner is MainForm f)
-				f.TryInvoke(f.AddNewTask, dc.Clone());
+			{
+				if (dc.MultiURL)
+					f.TryInvoke(f.AddNewMultiTasks, dc.Clone());
+				else
+					f.TryInvoke(f.AddNewTask, dc.Clone());
+			}
 
 			Close();
 		}
@@ -88,7 +93,7 @@ namespace HttpDownloader
 			cnfs.RemoveAt(index);
 			cbbConfigs.Items.RemoveAt(index);
 
-			if(cnfs.Count > 0)
+			if (cnfs.Count > 0)
 				cbbConfigs.SelectedIndex = index >= cnfs.Count ? index - 1 : index;
 			else
 			{
@@ -103,7 +108,7 @@ namespace HttpDownloader
 		{
 			var dc = (DownloadConfig)cbbConfigs.SelectedItem;
 			var host = dc.Host;
-			if(host == null)
+			if (host == null)
 			{
 				MessageBox.Show("Set host first");
 			}
