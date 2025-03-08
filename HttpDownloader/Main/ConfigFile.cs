@@ -94,9 +94,11 @@ namespace HttpDownloader
 		public string Pragma { get; set; } = "no-cache";
 		public string Cache_Control { get; set; } = "no-cache";
 		public string Cookie { get; set; }
+		public bool UseCookie { get; set; }
 		public bool Debug { get; set; } = false;
 
 		[Category("Proxy")] public string Proxy { get; set; }
+		[Category("Proxy")] public bool UseProxy { get; set; }
 		[Category("Main"), PropertyOrder(2)] public string IP { get; set; }
 
 		[Category("Main"), PropertyOrder(1)]
@@ -150,9 +152,9 @@ namespace HttpDownloader
 			if (Origin.HasValue()) headers.Add("Origin", Origin);
 
 			if (AutoDecompress) req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			if (Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
+			if (UseProxy && Proxy.HasValue()) req.Proxy = new WebProxy(Proxy);
 
-			if (Cookie.HasValue())
+			if (UseCookie && Cookie.HasValue())
 			{
 				req.CookieContainer = new CookieContainer();
 				req.CookieContainer.SetCookies(uri, Cookie);
