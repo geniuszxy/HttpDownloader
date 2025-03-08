@@ -162,7 +162,7 @@ namespace HttpDownloader
 			string filename, directory = null;
 
 			if (config.AutoFilename)
-				filename = Path.GetFileName(config.Uri.AbsolutePath);
+				filename = WebUtility.UrlDecode(Path.GetFileName(config.Uri.AbsolutePath));
 			else
 				filename = config.Filename.Trim();
 

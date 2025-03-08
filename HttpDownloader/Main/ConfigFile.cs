@@ -69,6 +69,7 @@ namespace HttpDownloader
 		[Category("Config")] public bool AutoFilename { get; set; } = true;
 
 		[Category("Main"), PropertyOrder(1), RefreshProperties(RefreshProperties.Repaint)]
+		[Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
 		public string URL
 		{
 			get { return _url; }
@@ -110,6 +111,9 @@ namespace HttpDownloader
 					return _host;
 
 				if (string.IsNullOrWhiteSpace(URL))
+					return null;
+
+				if (MultiURL)
 					return null;
 
 				var uri = new Uri(URL);
@@ -175,6 +179,8 @@ namespace HttpDownloader
 			=> IP.HasValue() ?
 			new UriBuilder(URL) { Host = IP }.Uri :
 			new Uri(URL);
+
+		internal bool MultiURL => URL.Contains("\n");
 	}
 
 	public static class StringUtils

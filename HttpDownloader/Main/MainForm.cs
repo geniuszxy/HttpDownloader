@@ -6,6 +6,8 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -52,6 +54,23 @@ namespace HttpDownloader
 			d.Start(config);
 		}
 
+		/// <summary>
+		/// Callback from TaskConfigWindow
+		/// </summary>
+		internal async void AddNewMultiTasks(DownloadConfig config)
+		{
+			await Task.Yield();
+			var splitter = new char[] { '\r', '\n' };
+			var urls = config.URL.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
+			Action<DownloadConfig> a = AddNewTask;
+			foreach(var url in urls)
+			{
+				config.URL = url;
+				this.TryInvoke(a, config.Clone());
+				await Task.Yield();
+			}
+		}
+
 		private void NewToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			var dialog = new TaskConfigWindow(_cf);
@@ -67,6 +86,7 @@ namespace HttpDownloader
 		internal void OnTaskCancelled(Downloader downloader)
 		{
 			mainContainer.Panel1.Controls.Remove(downloader);
+			downloader.Dispose();
 		}
 
 		private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -114,7 +134,10 @@ namespace HttpDownloader
 					if (control.IsComplete)
 						removeList.Add(control);
 				foreach (var control in removeList)
+				{
 					controls.Remove(control);
+					control.Dispose();
+				}
 				removeList.Clear();
 			}
 			panel.ResumeLayout(true);
